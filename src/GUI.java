@@ -7,23 +7,24 @@ import java.awt.BorderLayout;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import java.awt.GridLayout;
+import java.awt.event.*;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JLabel;
 
-public class GUI {
+public class GUI extends JFrame implements ActionListener {
 
-	private JFrame frame;
-	private JTextField textField;
-	private JTextArea textArea;
-	private JPanel southPanel;
-	private JPanel eastPanel;
-	private JPanel northPanel;
-	private JLabel lblTitle;
-	private JList list;
-	private JButton btnConnect;
-	private JButton btnSend;
+	protected JTextField textField;
+	protected JTextArea textArea;
+	protected JPanel southPanel;
+	protected JPanel eastPanel;
+	protected JPanel northPanel;
+	protected JLabel lblTitle;
+	protected JList list;
+	protected JButton btnConnect;
+	protected JButton btnSend;
+	protected Client client;
 
 	/**
 	 * Launch the application.
@@ -33,7 +34,7 @@ public class GUI {
 			public void run() {
 				try {
 					GUI window = new GUI();
-					window.frame.setVisible(true);
+					window.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -52,29 +53,30 @@ public class GUI {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(new BorderLayout(0, 0));
+
+		this.setBounds(100, 100, 450, 300);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		northPanel = new JPanel();
-		frame.getContentPane().add(northPanel, BorderLayout.NORTH);
+		this.getContentPane().add(northPanel, BorderLayout.NORTH);
 		// Title
 		lblTitle = new JLabel("ChatBox");
 		northPanel.add(lblTitle);
 		
 		eastPanel = new JPanel();
-		frame.getContentPane().add(eastPanel, BorderLayout.EAST);
+		this.getContentPane().add(eastPanel, BorderLayout.EAST);
 		eastPanel.setLayout(new GridLayout(0, 1, 0, 0));
 		// List of connected clients
 		list = new JList();
 		eastPanel.add(list);
 		
 		btnConnect = new JButton("Connect");
+		btnConnect.addActionListener(this);
 		eastPanel.add(btnConnect);
 		
 		southPanel = new JPanel();
-		frame.getContentPane().add(southPanel, BorderLayout.SOUTH);
+		this.getContentPane().add(southPanel, BorderLayout.SOUTH);
 		southPanel.setLayout(new GridLayout(0, 2, 0, 0));
 		
 		textField = new JTextField();
@@ -82,10 +84,24 @@ public class GUI {
 		textField.setColumns(10);
 		
 		btnSend = new JButton("Send");
+		btnSend.addActionListener(this); // Add action listener
 		southPanel.add(btnSend);
 		
 		textArea = new JTextArea();
-		frame.getContentPane().add(textArea, BorderLayout.CENTER);
+		this.getContentPane().add(textArea, BorderLayout.CENTER);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object source = e.getSource();
+
+		if (source == btnConnect) {
+			client = new Client(this);
+			client.startClient();
+		} else if (source == btnSend) {
+			
+		}
+
 	}
 
 }
