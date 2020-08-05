@@ -96,10 +96,12 @@ public class GUI extends JFrame implements ActionListener {
 		Object source = e.getSource();
 
 		if (source == btnConnect) {
-			client = new Client(this);
-			client.startClient();
+            if (client == null) {
+                client = new Client(this);
+                client.startClient();
+            }
 		} else if (source == btnSend) {
-			
+			client.send();
 		}
 
 	}
