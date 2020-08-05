@@ -13,7 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JLabel;
 
-public class GUI extends JFrame implements ActionListener {
+public class GUI extends JFrame implements ActionListener, WindowListener {
 
 	protected JTextField textField;
 	protected JTextArea textArea;
@@ -105,5 +105,47 @@ public class GUI extends JFrame implements ActionListener {
 		}
 
 	}
+
+    @Override
+    public void windowOpened(WindowEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void windowClosing(WindowEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void windowClosed(WindowEvent e) {
+        // TODO Auto-generated method stub
+        client.stopClient();
+    }
+
+    @Override
+    public void windowIconified(WindowEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void windowDeiconified(WindowEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void windowActivated(WindowEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void windowDeactivated(WindowEvent e) {
+        // TODO Auto-generated method stub
+
+    }
 
 }
