@@ -87,7 +87,8 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 		btnSend.addActionListener(this); // Add action listener
 		southPanel.add(btnSend);
 		
-		textArea = new JTextArea();
+        textArea = new JTextArea();
+        textArea.setEditable(false);
 		this.getContentPane().add(textArea, BorderLayout.CENTER);
 	}
 

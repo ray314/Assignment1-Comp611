@@ -35,7 +35,7 @@ public class Client {
     }
 
     public void send() {
-        if (!textField.getText().equals("")) {
+        if (!textField.getText().equals("") && isOpen) {
             pw.println(textField.getText());
             textField.setText("");
         }
