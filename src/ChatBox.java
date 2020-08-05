@@ -37,7 +37,7 @@ public class ChatBox implements Runnable{
             do {
                 String clientResponse = br.readLine();
                 pw.println(clientResponse);
-            } while (false);
+            } while (true);
         } catch (IOException e) {
             System.err.println("Error: " + e);
         }

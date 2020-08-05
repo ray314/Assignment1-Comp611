@@ -9,6 +9,7 @@ import java.util.Scanner;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 
 /**
@@ -23,15 +24,20 @@ public class Client {
     private BufferedReader br; // output stream from server
     private Socket socket;
     private GUI gui;
+    private JTextArea textArea;
+    private JTextField textField;
     private boolean isOpen;
 
     public Client(GUI gui) {
         this.gui = gui;
+        this.textArea = gui.textArea;
+        this.textField = gui.textField;
     }
 
     public void send() {
-        if (!gui.textField.getText().equals("")) {
-            pw.println(gui.textField.getText());
+        if (!textField.getText().equals("")) {
+            pw.println(textField.getText());
+            textField.setText("");
         }
     }
 
@@ -86,7 +92,7 @@ public class Client {
             try {
                 do {
                     serverResponse = br.readLine();
-                    gui.textArea.setText(gui.textArea.getText() + "\n" + serverResponse);
+                    textArea.setText(textArea.getText() + "\n" + serverResponse);
                 } while (isOpen);
                 
             } catch (IOException e) {
