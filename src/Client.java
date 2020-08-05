@@ -17,7 +17,7 @@ import javax.swing.JTextArea;
  * @author fbb3628
  */
 public class Client {
-    private static final String HOST_NAME = "localhost";
+    private static final String HOST_NAME = "192.168.1.78";
     private static final int HOST_PORT = 7777;
     private PrintWriter pw; // input stream to server
     private BufferedReader br; // output stream from server
@@ -51,10 +51,8 @@ public class Client {
             br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             // Check if user closed the client
             boolean finished = false;
-            do {
                 String serverResponse = br.readLine();
                 gui.textArea.setText(gui.textArea.getText() + "\n" + serverResponse);
-            } while (!finished);
             pw.close();
             br.close();
             socket.close();
