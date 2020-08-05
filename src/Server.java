@@ -56,6 +56,7 @@ public class Server
             Socket socket = serverSocket.accept();
             System.out.println("Connection made with "
                + socket.getInetAddress());
+               
             // start a chatbox with this connection, note that a server
             // might typically keep a reference to each chatbox
             ChatBox chatbox = new ChatBox(socket);
