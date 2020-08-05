@@ -31,7 +31,7 @@ public class Client {
 
     public void send() {
         if (!gui.textField.getText().equals("")) {
-            pw.println(gui.textField);
+            pw.println(gui.textField.getText());
         }
     }
 
