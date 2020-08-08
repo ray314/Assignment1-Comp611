@@ -8,12 +8,17 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import java.awt.GridLayout;
 import java.awt.event.*;
+import java.io.Serializable;
+
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JLabel;
 
-public class GUI extends JFrame implements ActionListener, WindowListener {
+/**
+ * The GUI for the client
+ */
+public class GUI extends JFrame implements ActionListener, WindowListener, Serializable {
 
 	protected JTextField textField;
 	protected JTextArea textArea;
@@ -21,7 +26,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 	protected JPanel eastPanel;
 	protected JPanel northPanel;
 	protected JLabel lblTitle;
-	protected JList list;
+	protected JList<Client> list;
 	protected JButton btnConnect;
 	protected JButton btnSend;
 	protected Client client;
@@ -61,14 +66,14 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 		northPanel = new JPanel();
 		this.getContentPane().add(northPanel, BorderLayout.NORTH);
 		// Title
-		lblTitle = new JLabel("ChatBox");
+		lblTitle = new JLabel("ChatBox. Name: Test");
 		northPanel.add(lblTitle);
 		
 		eastPanel = new JPanel();
 		this.getContentPane().add(eastPanel, BorderLayout.EAST);
 		eastPanel.setLayout(new GridLayout(0, 1, 0, 0));
 		// List of connected clients
-		list = new JList();
+		list = new JList<>();
 		eastPanel.add(list);
 		
 		btnConnect = new JButton("Connect");
@@ -98,7 +103,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 
 		if (source == btnConnect) {
             if (client == null) {
-                client = new Client(this);
+                client = new Client(this, "Test");
                 client.startClient();
             }
 		} else if (source == btnSend) {

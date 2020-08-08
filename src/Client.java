@@ -3,10 +3,12 @@ package src;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.net.Socket;
-import java.util.Scanner;
 
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -17,27 +19,46 @@ import javax.swing.JTextField;
  * 
  * @author fbb3628
  */
-public class Client {
-    private static final String HOST_NAME = "192.168.1.78";
+public class Client implements Serializable{
+    private static final String HOST_NAME = "192.168.1.78"; // Change host name when server starts
     private static final int HOST_PORT = 7777;
-    private PrintWriter pw; // input stream to server
-    private BufferedReader br; // output stream from server
+    private PrintWriter pw; // input stream to chatbox
+    private BufferedReader br; // output stream from chatbox
     private Socket socket;
     private GUI gui;
     private JTextArea textArea;
     private JTextField textField;
     private boolean isOpen;
+    private String name;
+    private JList<Client> clientList;
 
-    public Client(GUI gui) {
+    public Client(GUI gui, String name) {
         this.gui = gui;
         this.textArea = gui.textArea;
         this.textField = gui.textField;
+        this.name = name;
+        this.clientList = Server.getClientList();
+    }
+
+    /**
+     * Returns this client's socket
+     * @return Socket
+     */
+    public Socket getSocket() {
+        return socket;
     }
 
     public void send() {
-        if (!textField.getText().equals("") && isOpen) {
-            pw.println(textField.getText());
-            textField.setText("");
+        Client receivingClient = clientList.getSelectedValue();
+        if (!textField.getText().equals("") && receivingClient != null) {
+            try {
+                pw = new PrintWriter(receivingClient.getSocket().getOutputStream());
+                pw.println(name + ": " + textField.getText());
+                textField.setText("");
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                JOptionPane.showMessageDialog(gui, "An error occured when sending message: " + e, "Error", JOptionPane.ERROR_MESSAGE);;
+            }
         }
     }
 
@@ -54,11 +75,18 @@ public class Client {
 
         try {
             // Create an autoflush output stream for the socket
-            pw = new PrintWriter(socket.getOutputStream(), true);
+            //pw = new PrintWriter(socket.getOutputStream(), true);
             // Create a buffered input stream for this socket
             br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             // Set open client to true
             isOpen = true;
+            // Send this Client object to server
+            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+            oos.writeObject(this);
+            // Close object stream
+            oos.close();
+            // Replace the JList with the Server one
+            gui.list = Server.getClientList();
             InnerReceive receive = new InnerReceive();
             Thread thread = new Thread(receive);
             thread.start();

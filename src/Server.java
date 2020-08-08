@@ -9,18 +9,33 @@ package src;
    @author Andrew Ensor
 */
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+import javax.swing.ListSelectionModel;
 
 public class Server
 {
-   private boolean stopRequested;
-   private static Server instance;
-   public static final int PORT = 7777; // some unused port number
+    private HashMap<String, Socket> clients;
+    private boolean stopRequested;
+    private static Server instance;
+    public static final int PORT = 7777; // some unused port number
+
+    public final static DefaultListModel<Client> model = new DefaultListModel<>();
+    public final static JList<Client> clientList = new JList<>(model);
    
    private Server() {  
       stopRequested = false;
+      clients = new HashMap<>();
+      // Set list to single selection only
+      clientList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+      clientList.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
    }
 
    public static Server getInstance() {
@@ -33,6 +48,10 @@ public class Server
            }   
        }
        return instance;
+   }
+
+   public static JList<Client> getClientList() {
+       return Server.clientList;
    }
    
    // start the server if not already started and repeatedly listen
@@ -56,7 +75,12 @@ public class Server
             Socket socket = serverSocket.accept();
             System.out.println("Connection made with "
                + socket.getInetAddress());
-               
+            
+            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+            // Retrieve Client from stream
+            Client client = (Client) ois.readObject();
+            // Add client to JList
+            model.addElement(client);
             // start a chatbox with this connection, note that a server
             // might typically keep a reference to each chatbox
             ChatBox chatbox = new ChatBox(socket);
@@ -67,6 +91,8 @@ public class Server
       }
       catch (IOException e)
       {  System.err.println("Can't accept client connection: " + e);
+      } catch (ClassNotFoundException e) {
+          System.err.println("Couldn't read Client object from stream");
       }
       System.out.println("Server finishing");
    }
