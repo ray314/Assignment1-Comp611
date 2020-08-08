@@ -81,11 +81,6 @@ public class Server
             Client client = (Client) ois.readObject();
             // Add client to JList
             model.addElement(client);
-            // start a chatbox with this connection, note that a server
-            // might typically keep a reference to each chatbox
-            ChatBox chatbox = new ChatBox(socket);
-            Thread thread = new Thread(chatbox);
-            thread.start();
          }
          serverSocket.close();
       }
