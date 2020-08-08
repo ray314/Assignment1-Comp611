@@ -78,6 +78,8 @@ public class Server
             Client client = (Client) ois.readObject();
             // Add client to JList
             model.addElement(client);
+            // Close stream
+            ois.close();
          }
          serverSocket.close();
       }
