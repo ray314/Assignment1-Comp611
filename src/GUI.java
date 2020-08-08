@@ -8,7 +8,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import java.awt.GridLayout;
 import java.awt.event.*;
-import java.io.Serializable;
 
 import javax.swing.JPanel;
 import javax.swing.JButton;
@@ -18,7 +17,7 @@ import javax.swing.JLabel;
 /**
  * The GUI for the client
  */
-public class GUI extends JFrame implements ActionListener, WindowListener, Serializable {
+public class GUI extends JFrame implements ActionListener, WindowListener {
 
 	protected JTextField textField;
 	protected JTextArea textArea;
@@ -26,7 +25,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener, Seria
 	protected JPanel eastPanel;
 	protected JPanel northPanel;
 	protected JLabel lblTitle;
-	protected JList<Client> list;
+	protected JList<String> list;
 	protected JButton btnConnect;
 	protected JButton btnSend;
 	protected Client client;

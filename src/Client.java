@@ -3,9 +3,7 @@ package src;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.net.Socket;
 
 import javax.swing.JList;
@@ -19,7 +17,7 @@ import javax.swing.JTextField;
  * 
  * @author fbb3628
  */
-public class Client implements Serializable{
+public class Client {
     private static final String HOST_NAME = "192.168.1.78"; // Change host name when server starts
     private static final int HOST_PORT = 7777;
     private transient PrintWriter pw; // input stream to chatbox
@@ -30,7 +28,7 @@ public class Client implements Serializable{
     private JTextField textField;
     private boolean isOpen;
     private String name;
-    private JList<Client> clientList;
+    private JList<String> clientList;
 
     public Client(GUI gui, String name) {
         this.gui = gui;
@@ -49,10 +47,11 @@ public class Client implements Serializable{
     }
 
     public void send() {
-        Client receivingClient = clientList.getSelectedValue();
-        if (!textField.getText().equals("") && receivingClient != null) {
+        String receivingName = clientList.getSelectedValue();
+        Socket receivingSocket = Server.getClientSocket(receivingName);
+        if (!textField.getText().equals("") && receivingName != null) {
             try {
-                pw = new PrintWriter(receivingClient.getSocket().getOutputStream());
+                pw = new PrintWriter(receivingSocket.getOutputStream());
                 pw.println(name + ": " + textField.getText());
                 textField.setText("");
             } catch (IOException e) {
@@ -75,16 +74,15 @@ public class Client implements Serializable{
 
         try {
             // Create an autoflush output stream for the socket
-            //pw = new PrintWriter(socket.getOutputStream(), true);
+            pw = new PrintWriter(socket.getOutputStream(), true);
             // Create a buffered input stream for this socket
             br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             // Set open client to true
             isOpen = true;
-            // Send this Client object to server
-            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-            oos.writeObject(this);
-            // Close object stream
-            oos.close();
+            // Send this client's name to server
+            pw.println(name + "@" + socket.getInetAddress());
+            // Close stream
+            pw.close();
             // Replace the JList with the Server one
             gui.list = Server.getClientList();
             InnerReceive receive = new InnerReceive();
