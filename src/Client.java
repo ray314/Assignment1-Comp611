@@ -22,8 +22,8 @@ import javax.swing.JTextField;
 public class Client implements Serializable{
     private static final String HOST_NAME = "192.168.1.78"; // Change host name when server starts
     private static final int HOST_PORT = 7777;
-    private PrintWriter pw; // input stream to chatbox
-    private BufferedReader br; // output stream from chatbox
+    private transient PrintWriter pw; // input stream to chatbox
+    private transient BufferedReader br; // output stream from chatbox
     private Socket socket;
     private GUI gui;
     private JTextArea textArea;
