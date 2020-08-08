@@ -38,7 +38,9 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 			public void run() {
 				try {
 					GUI window = new GUI();
-					window.setVisible(true);
+                    window.setVisible(true);
+                    SetNameDialog dialog = new SetNameDialog(window);
+                    dialog.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -65,7 +67,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 		northPanel = new JPanel();
 		this.getContentPane().add(northPanel, BorderLayout.NORTH);
 		// Title
-		lblTitle = new JLabel("ChatBox. Name: Test");
+		lblTitle = new JLabel("Your name: Test");
 		northPanel.add(lblTitle);
 		
 		eastPanel = new JPanel();
@@ -93,7 +95,8 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 		
         textArea = new JTextArea();
         textArea.setEditable(false);
-		this.getContentPane().add(textArea, BorderLayout.CENTER);
+        this.getContentPane().add(textArea, BorderLayout.CENTER);
+        
 	}
 
 	@Override
