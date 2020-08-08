@@ -103,8 +103,6 @@ public class Server {
        }
        catch (IOException e)
        {  System.err.println("Can't accept client connection: " + e);
-       } catch (ClassNotFoundException e) {
-           System.err.println("Couldn't read Client object from stream");
        }
        System.out.println("Server finishing");
     }
