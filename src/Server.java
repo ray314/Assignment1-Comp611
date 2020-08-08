@@ -13,7 +13,6 @@ import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -22,7 +21,6 @@ import javax.swing.ListSelectionModel;
 
 public class Server
 {
-    private HashMap<String, Socket> clients;
     private boolean stopRequested;
     private static Server instance;
     public static final int PORT = 7777; // some unused port number
@@ -32,7 +30,6 @@ public class Server
    
    private Server() {  
       stopRequested = false;
-      clients = new HashMap<>();
       // Set list to single selection only
       clientList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       clientList.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
