@@ -39,6 +39,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 				try {
 					GUI window = new GUI();
                     window.setVisible(true);
+                    window.client = new Client(window);
                     SetNameDialog dialog = new SetNameDialog(window);
                     dialog.setVisible(true);
 				} catch (Exception e) {
@@ -104,8 +105,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 		Object source = e.getSource();
 
 		if (source == btnConnect) {
-            if (client == null) {
-                client = new Client(this, "Test");
+            if (client.getSocket() != null) {
                 client.startClient();
             }
 		} else if (source == btnSend) {

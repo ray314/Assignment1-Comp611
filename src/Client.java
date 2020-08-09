@@ -30,11 +30,10 @@ public class Client {
     private String name;
     private JList<String> clientList;
 
-    public Client(GUI gui, String name) {
+    public Client(GUI gui) {
         this.gui = gui;
         this.textArea = gui.textArea;
         this.textField = gui.textField;
-        this.name = name;
         this.clientList = Server.getClientList();
     }
 
@@ -44,6 +43,20 @@ public class Client {
      */
     public Socket getSocket() {
         return socket;
+    }
+    /**
+     * Returns the client name
+     * @return
+     */
+    public String getName() {
+        return name;
+    }
+    /**
+     * Sets the client name
+     * @param name
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void send() {
