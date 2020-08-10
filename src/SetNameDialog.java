@@ -15,14 +15,12 @@ import java.awt.GridLayout;
 public class SetNameDialog extends JDialog implements ActionListener {
 
     private GUI gui;
-    private boolean nameSet;
     private JLabel label;
     private JTextField nameField;
     private CustomButton button;
 
     public SetNameDialog(GUI gui) {
         super(gui, "Enter name (required)", true);
-        this.nameSet = false;
         this.gui = gui;
         
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -52,7 +50,8 @@ public class SetNameDialog extends JDialog implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (!nameField.getText().equals("")) {
-                gui.client.setName(nameField.getText());
+                // Set user name
+                gui.userName = nameField.getText();
                 gui.lblTitle.setText("Name: " + nameField.getText());
                 dispose();
             } else {
