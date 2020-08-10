@@ -2,16 +2,17 @@ package src;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import java.awt.event.*;
-import java.util.jar.Attributes.Name;
 import java.awt.GridLayout;
 
-public class SetNameDialog extends JDialog implements ActionListener, WindowListener {
+/**
+ * A custom dialog for inputting name
+ */
+public class SetNameDialog extends JDialog implements ActionListener {
 
     private GUI gui;
     private boolean nameSet;
@@ -20,7 +21,7 @@ public class SetNameDialog extends JDialog implements ActionListener, WindowList
     private CustomButton button;
 
     public SetNameDialog(GUI gui) {
-        super(gui, "Enter name", true);
+        super(gui, "Enter name (required)", true);
         this.nameSet = false;
         this.gui = gui;
         
@@ -58,47 +59,5 @@ public class SetNameDialog extends JDialog implements ActionListener, WindowList
                 JOptionPane.showMessageDialog(gui, "Please enter a name", "Enter name", JOptionPane.INFORMATION_MESSAGE);
             }
         }
-    }
-
-    @Override
-    public void windowOpened(WindowEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
-        gui.dispose();
-        System.exit(-1);
-    }
-
-    @Override
-    public void windowClosed(WindowEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windowIconified(WindowEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windowDeiconified(WindowEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windowActivated(WindowEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windowDeactivated(WindowEvent e) {
-        // TODO Auto-generated method stub
-
     }
 }

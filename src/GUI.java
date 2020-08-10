@@ -17,7 +17,7 @@ import javax.swing.JLabel;
 /**
  * The GUI for the client
  */
-public class GUI extends JFrame implements ActionListener, WindowListener {
+public class GUI extends JFrame implements ActionListener {
 
 	protected JTextField textField;
 	protected JTextArea textArea;
@@ -40,8 +40,6 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 					GUI window = new GUI();
                     window.setVisible(true);
                     window.client = new Client(window);
-                    SetNameDialog dialog = new SetNameDialog(window);
-                    dialog.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -68,15 +66,14 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 		northPanel = new JPanel();
 		this.getContentPane().add(northPanel, BorderLayout.NORTH);
 		// Title
-		lblTitle = new JLabel("Your name: Test");
+		lblTitle = new JLabel("Your name: ");
 		northPanel.add(lblTitle);
 		
 		eastPanel = new JPanel();
 		this.getContentPane().add(eastPanel, BorderLayout.EAST);
 		eastPanel.setLayout(new GridLayout(0, 1, 0, 0));
 		// List of connected clients
-		list = new JList<>();
-		eastPanel.add(list);
+		list = Server.getClientList();
 		
 		btnConnect = new JButton("Connect");
 		btnConnect.addActionListener(this);
@@ -92,6 +89,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 		
 		btnSend = new JButton("Send");
 		btnSend.addActionListener(this); // Add action listener
+		btnSend.setEnabled(false); // Don't enable until client has connected
 		southPanel.add(btnSend);
 		
         textArea = new JTextArea();
@@ -105,55 +103,23 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 		Object source = e.getSource();
 
 		if (source == btnConnect) {
-            if (client.getSocket() != null) {
-                client.startClient();
-            }
+            if (client.getName() != null) {
+				
+				// Note that server must be started first to obtain list
+            } else {
+				SetNameDialog dialog = new SetNameDialog(this);
+				// Don't let the user close dialog until name is entered
+				dialog.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+				dialog.setVisible(true);
+				btnSend.setEnabled(true);
+				btnConnect.setEnabled(false); // Disable connect after client connected
+				client.startClient();
+			}
 		} else if (source == btnSend) {
-			client.send();
+			String receivingName = list.getSelectedValue();
+			if (!textField.getText().equals("") && receivingName != null) {
+				client.send(textField.getText());
+			}
 		}
-
 	}
-
-    @Override
-    public void windowOpened(WindowEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windowClosed(WindowEvent e) {
-        // TODO Auto-generated method stub
-        client.stopClient();
-    }
-
-    @Override
-    public void windowIconified(WindowEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windowDeiconified(WindowEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windowActivated(WindowEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windowDeactivated(WindowEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
 }

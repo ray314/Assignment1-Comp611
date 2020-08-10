@@ -27,8 +27,10 @@ public class Server {
     private static Server instance;
     public static final int PORT = 7777; // some unused port number
 
+    // Create a JList with a Default list model
     private final static DefaultListModel<String> model = new DefaultListModel<>();
     private final static JList<String> clientList = new JList<>(model);
+    // Create a HashMap to store the sockets and map them to names+IP address
     private final static HashMap<String, Socket> map = new HashMap<>();
    
     private Server() {  
