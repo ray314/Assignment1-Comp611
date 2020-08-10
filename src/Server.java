@@ -82,7 +82,7 @@ public class Server {
             ObjectOutputStream oos = null;
             ObjectInputStream ois = null;
             try {
-                do {
+                while (!stopRequested) {
                     // Create input stream
                     ois = new ObjectInputStream(socket.getInputStream());
                     // Receive input and send while client is up
@@ -99,9 +99,7 @@ public class Server {
                     }
                     // Close streams when finished
                     ois.close();
-                } while(!socket.isClosed());
-                
-                
+                }
             } catch (IOException e) {
                 System.err.println("An error occured: " + e);
                 e.printStackTrace();
