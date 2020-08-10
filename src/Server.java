@@ -126,9 +126,11 @@ public class Server {
                 } while(!socket.isClosed());
                 // Close streams when finished
                 ois.close();
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (IOException e) {
                 System.err.println("An error occured: " + e);
-            } 
+            } catch (ClassNotFoundException e) {
+                System.err.println("Class not found: " + e);
+            }
             
         }
         // Add client to map and Jlist

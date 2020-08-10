@@ -25,9 +25,9 @@ import javax.swing.JLabel;
  */
 public class GUI extends JFrame implements ActionListener, WindowListener {
 
-    private final String HOST_NAME = "";
+    private final String HOST_NAME = "192.168.1.69";
     private final int PORT = 7777;
-    private boolean closing;
+    private boolean closing; // Check if GUI closed
 
     public String userName;
 
@@ -63,6 +63,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
      */
     public GUI() {
         initialize();
+        closing = false;
     }
 
     /**
@@ -73,6 +74,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         this.setBounds(100, 100, 450, 300);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.getContentPane().setLayout(new BorderLayout(0, 0));
+        this.addWindowListener(this);
 
         northPanel = new JPanel();
         this.getContentPane().add(northPanel, BorderLayout.NORTH);
@@ -124,6 +126,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                 try {
                     ObjectOutputStream oos = new ObjectOutputStream(destClient.getSocket().getOutputStream());
                     oos.writeObject(msg); // Write message to stream
+                    textField.setText(""); // Clear text field
                 } catch (IOException e1) {
                     JOptionPane.showMessageDialog(this, "An error occurred when sending message: "+e1, "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -142,17 +145,44 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             Socket socket = new Socket(HOST_NAME, PORT);
             client = new Client(userName, socket);
             // Create a new thread then run update
-            UpdateClientList update = new UpdateClientList();
-            Thread thread = new Thread(update);
+            Thread thread = new UpdateClientList();
             thread.start();
+            
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
     }
-    // Update client list periodically
-    private class UpdateClientList implements Runnable {
+    // Inner class to receive messages
+    private class InnerReceive extends Thread {
+        @Override
+        public void run() {
+            Socket socket = client.getSocket();
+            try {
+                // Create streams
+                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                do {
+                    // Retrieve messages from server
+                    Object serverResponse = ois.readObject();
+                    if (serverResponse instanceof SendMessage) {
+                        // Typecast into SendMessage
+                        SendMessage sendMsg = (SendMessage) serverResponse;
+                        // Get text area and add new text in new line
+                        String message = textArea.getText() + "\n" + sendMsg.getOrigUserName() + ": " + sendMsg.getMessage();
+                        // Set text area
+                        textArea.setText(message);
+                    }
+                } while (!closing); // End loop when client closes
+                // Close stream
+                ois.close();
+            } catch (IOException | ClassNotFoundException e) {
+                System.err.println("Error updating client list: " + e);
+            }
+        }
+    }
 
+    // Update client list periodically
+    private class UpdateClientList extends Thread {
         @Override
         public void run() {
             Socket socket = client.getSocket();
@@ -165,19 +195,25 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                     oos.writeObject(list);
                     // Retrieve updated list from server
                     list = (JList<Client>) ois.readObject();
+                    System.out.println("updating");
                     Thread.sleep(500); // Wait every half second
                 } while (!closing); // End loop when client closes
-            } catch (IOException | ClassNotFoundException | InterruptedException e) {
+                // Close streams
+                oos.close();
+                ois.close();
+            } catch (IOException e) {
                 System.err.println("Error updating client list: " + e);
+            } catch (ClassNotFoundException e) {
+                System.err.println("Class not found: " + e);
+            } catch (InterruptedException e) {
+                System.err.println("Interrupted: " + e);
             }
-            
         }
-        
     }
 
     @Override
     public void windowClosing(WindowEvent e) {
-
+        closing = true;
     }
 
     // Rest useless methods
