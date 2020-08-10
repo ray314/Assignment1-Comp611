@@ -82,9 +82,11 @@ public class Server {
             ObjectOutputStream oos = null;
             ObjectInputStream ois = null;
             try {
+                // Create input stream
+                ois = new ObjectInputStream(socket.getInputStream());
                 while (!stopRequested) {
-                    // Create input stream
-                    ois = new ObjectInputStream(socket.getInputStream());
+                    
+                    System.out.println("Test");
                     // Receive input and send while client is up
                     Object serverResponse = ois.readObject();
                     // Check what object did the server receive
@@ -94,20 +96,19 @@ public class Server {
                         addClient(serverResponse);
                     } else if (serverResponse instanceof JList) { // Send in the client list
                         oos = new ObjectOutputStream(socket.getOutputStream());
-                        oos.writeObject(list); // Write list into stream
+                        //oos.writeObject(list); // Write list into stream
                         oos.flush();
+                        oos.reset();
                     }
-                    // Close streams when finished
-                    //ois.close();
                 }
                 oos.close();
-                ois.close();
+                //ois.close();
             } catch (IOException e) {
                 System.err.println("An error occured: " + e);
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 System.err.println("Class not found: " + e);
-            } 
+            }
             
         }
         // Add client to map and Jlist
@@ -135,7 +136,8 @@ public class Server {
             // Write object to stream
             oos.writeObject(sendMsg);
             //Close stream
-            oos.close();
+            oos.flush();
+            oos.reset();
         }
     }
 }
