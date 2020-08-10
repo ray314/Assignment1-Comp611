@@ -196,11 +196,11 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             try {
                 do {
                     // Create streams
-                    //ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
                     
                     // Write a JList into stream
-                    //oos.writeObject(list);
-                    //oos.close();
+                    oos.writeObject(list);
+                    oos.close();
                     // Retrieve updated list from server
                     ois = new ObjectInputStream(socket.getInputStream());
                     list = (JList<Client>) ois.readObject();
@@ -218,7 +218,9 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                 System.err.println("Interrupted: " + e);
             } finally {
                 try {
-                    ois.close();
+                    if (ois != null) {
+                        ois.close();
+                    }
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

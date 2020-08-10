@@ -104,6 +104,7 @@ public class Server {
                 
             } catch (IOException e) {
                 System.err.println("An error occured: " + e);
+                e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 System.err.println("Class not found: " + e);
             } finally {
