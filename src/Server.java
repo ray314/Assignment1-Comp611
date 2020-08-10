@@ -79,8 +79,8 @@ public class Server {
         @Override
         public void run() {
             // Create object output and input streams
-            ObjectOutputStream oos;
-            ObjectInputStream ois;
+            ObjectOutputStream oos = null;
+            ObjectInputStream ois = null;
             try {
                 do {
                     // Create input stream
@@ -106,6 +106,15 @@ public class Server {
                 System.err.println("An error occured: " + e);
             } catch (ClassNotFoundException e) {
                 System.err.println("Class not found: " + e);
+            } finally {
+                if (ois != null) {
+                    try {
+                        ois.close();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
             }
             
         }

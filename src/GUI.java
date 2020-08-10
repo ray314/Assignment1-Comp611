@@ -151,9 +151,9 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             oos.writeObject(client); // Write client to stream
             // Create a new thread then run update
             Thread thread = new UpdateClientList();
-            Thread thread2 = new InnerReceive();
+            //Thread thread2 = new InnerReceive();
             thread.start();
-            thread2.start();
+            //thread2.start();
             
         } catch (IOException e1) {
             // TODO Auto-generated catch block
@@ -184,7 +184,6 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                 } while (!closing); // End loop when client closes
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Error receiving messages: " + e);
-                e.printStackTrace();
             }
         }
     }
@@ -194,31 +193,28 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         @Override
         public void run() {
             try {
-                
                 do {
                     // Create streams
-                    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                    //ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
                     ObjectInputStream ois;
                     // Write a JList into stream
-                    oos.writeObject(list);
-                    oos.close();
+                    //oos.writeObject(list);
+                    //oos.close();
                     // Retrieve updated list from server
                     ois = new ObjectInputStream(socket.getInputStream());
                     list = (JList<Client>) ois.readObject();
                     // Close streams
                     ois.close();
+                    System.out.println("test");
                     Thread.sleep(500); // Wait every half second
                 } while (!closing); // End loop when client closes
                 
             } catch (IOException e) {
                 System.err.println("Error updating client list: " + e);
-                e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 System.err.println("Class not found: " + e);
-                e.printStackTrace();
             } catch (InterruptedException e) {
                 System.err.println("Interrupted: " + e);
-                e.printStackTrace();
             }
         }
     }
