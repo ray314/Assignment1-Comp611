@@ -192,11 +192,12 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     private class UpdateClientList extends Thread {
         @Override
         public void run() {
+            ObjectInputStream ois = null;
             try {
                 do {
                     // Create streams
                     //ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                    ObjectInputStream ois;
+                    
                     // Write a JList into stream
                     //oos.writeObject(list);
                     //oos.close();
@@ -215,6 +216,13 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                 System.err.println("Class not found: " + e);
             } catch (InterruptedException e) {
                 System.err.println("Interrupted: " + e);
+            } finally {
+                try {
+                    ois.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
     }
