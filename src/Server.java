@@ -1,11 +1,8 @@
 package src;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -71,20 +68,24 @@ public class Server {
     private class Room implements Runnable{
 
         private Socket socket;
+        // Streams
+        private ObjectOutputStream oos;
+        private ObjectInputStream ois;
 
         public Room(Socket socket) {
             this.socket = socket;
+            try {
+                this.oos = new ObjectOutputStream(socket.getOutputStream());
+                this.ois = new ObjectInputStream(socket.getInputStream());
+            } catch (IOException e) {
+                System.err.println("An error occured when creating streams");
+                e.printStackTrace();
+            }
         }
 
         @Override
         public void run() {
-            // Create object output and input streams
-            ObjectOutputStream oos = null;
-            // Create input stream
-            ObjectInputStream ois = null;
             try {
-                // Create input stream
-                ois = new ObjectInputStream(socket.getInputStream());
                 while (!stopRequested) {
                     
                     System.out.println("Test");
@@ -97,7 +98,7 @@ public class Server {
                         addClient(serverResponse);
                     } else if (serverResponse instanceof JList) { // Send in the client list
                         oos = new ObjectOutputStream(socket.getOutputStream());
-                        //oos.writeObject(list); // Write list into stream
+                        oos.writeObject(list); // Write list into stream
                         oos.flush();
                         oos.reset();
                     }
