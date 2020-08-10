@@ -1,8 +1,9 @@
 package src;
 
+import java.io.Serializable;
 import java.net.Socket;
 
-public class Client {
+public class Client implements Serializable{
     private String userName;
     private String ipAddress;
     private Socket socket;
@@ -13,9 +14,8 @@ public class Client {
      * @param ipAddress - IP address
      * @param socket - Socket
      */
-    public Client (String userName, String ipAddress, Socket socket) {
+    public Client (String userName, Socket socket) {
         this.userName = userName;
-        this.ipAddress = ipAddress;
         this.socket = socket;
     }
 
@@ -33,6 +33,13 @@ public class Client {
      */
     public String getIPAddress() {
         return this.ipAddress;
+    }
+    /**
+     * Sets the IP Address for this client
+     * @param ipAddress - The IP address
+     */
+    public void setIPAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
     /**
      * Returns the username

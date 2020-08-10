@@ -1,6 +1,10 @@
 package src;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -75,18 +79,12 @@ public class Server {
             // note that the server socket could set an accept timeout
             Socket socket = serverSocket.accept();
             System.out.println("Connection made with " + socket.getInetAddress());
-            Client client = new Client(socket.getInetAddress().getHostName(), socket.getInetAddress().getHostAddress(), socket);
-            map.put(client.toString() + ":" + client.getIPAddress(), client);
+            //Client client = new Client(socket.getInetAddress().getHostName(), socket.getInetAddress().getHostAddress(), socket);
+            //map.put(client.toString() + ":" + client.getIPAddress(), client);
             
-            //BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            // Retrieve the name
-            //String name = br.readLine();
-            // Add name to JList
-            //model.addElement(name);
-            // Add name and socket to map
-            //map.put(name, socket);
-            // Close stream
-            //br.close();
+            Room room = new Room(socket);
+            Thread thread = new Thread(room);
+            thread.start();
             }
             serverSocket.close();
         }
@@ -94,5 +92,69 @@ public class Server {
        {  System.err.println("Can't accept client connection: " + e);
        }
        System.out.println("Server finishing");
+    }
+
+    private class Room implements Runnable{
+
+        private Socket socket;
+
+        public Room(Socket socket) {
+            this.socket = socket;
+        }
+
+        @Override
+        public void run() {
+            // Create object output and input streams
+            ObjectOutputStream oos;
+            ObjectInputStream ois;
+            try {
+                // Create input stream
+                ois = new ObjectInputStream(socket.getInputStream());
+                // Receive input and send while client is up
+                do {
+                    Object serverResponse = ois.readObject();
+                    // Check what object did the server receive
+                    if (serverResponse instanceof SendMessage) {
+                        forwardMessage(serverResponse);
+                    } else if (serverResponse instanceof Client) { // Retrieve client details
+                        addClient(serverResponse);
+                    } else if (serverResponse instanceof JList) { // Send in the client list
+                        oos = new ObjectOutputStream(socket.getOutputStream());
+                        oos.writeObject(list); // Write list into stream
+                    }
+
+                } while(!socket.isClosed());
+                // Close streams when finished
+                ois.close();
+            } catch (IOException | ClassNotFoundException e) {
+                System.err.println("An error occured: " + e);
+            } 
+            
+        }
+        // Add client to map and Jlist
+        private void addClient(Object serverResponse) {
+            // Typecast into Client object
+            Client client = (Client) serverResponse;
+            client.setIPAddress(socket.getInetAddress().getHostAddress());
+            // Put client into the hash map
+            map.put(client.toString() + ":" + client.getIPAddress(), client);
+            // Add client to JList
+            model.addElement(client);
+        }
+        // Forward the message to the destination client
+        private void forwardMessage(Object serverResponse) throws IOException {
+            ObjectOutputStream oos;
+            // Typecast into SendMessage object
+            SendMessage sendMsg = (SendMessage) serverResponse;
+            // Obtain message details
+            String destUserName = sendMsg.getDestUserName();
+            String destIPAddress = sendMsg.getIPAddress();
+            // Create new message object
+            Socket destSocket = map.get(destUserName + ":" + destIPAddress).getSocket();
+            // Create output stream for destination socket
+            oos = new ObjectOutputStream(destSocket.getOutputStream());
+            // Write object to stream
+            oos.writeObject(sendMsg);
+        }
     }
 }

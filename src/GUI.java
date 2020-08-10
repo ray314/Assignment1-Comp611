@@ -10,20 +10,25 @@ import javax.swing.JTextField;
 import java.awt.GridLayout;
 import java.awt.event.*;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JLabel;
 
 /**
  * The GUI for the client
  */
-public class GUI extends JFrame implements ActionListener {
+public class GUI extends JFrame implements ActionListener, WindowListener {
 
     private final String HOST_NAME = "";
     private final int PORT = 7777;
+    private boolean closing;
+
     public String userName;
 
     protected JTextField textField;
@@ -36,7 +41,6 @@ public class GUI extends JFrame implements ActionListener {
     protected JButton btnConnect;
     protected JButton btnSend;
     protected Client client;
-    protected Server server;
 
     /**
      * Launch the application.
@@ -59,7 +63,6 @@ public class GUI extends JFrame implements ActionListener {
      */
     public GUI() {
         initialize();
-        server = Server.server;
     }
 
     /**
@@ -81,7 +84,7 @@ public class GUI extends JFrame implements ActionListener {
         this.getContentPane().add(eastPanel, BorderLayout.EAST);
         eastPanel.setLayout(new GridLayout(0, 1, 0, 0));
         // List of connected clients
-        list = server.getClientList();
+        list = new JList();
 
         btnConnect = new JButton("Connect");
         btnConnect.addActionListener(this);
@@ -116,8 +119,14 @@ public class GUI extends JFrame implements ActionListener {
 		} else if (source == btnSend) {
 			Client destClient = list.getSelectedValue();
 			if (!textField.getText().equals("") && destClient != null) {
-
-				server.sendToOneClient(destClient.toString(), destClient.getIPAddress(), textField.getText());
+                // Create message
+                SendMessage msg = new SendMessage(userName, destClient.getIPAddress(), destClient.toString(), textField.getText());
+                try {
+                    ObjectOutputStream oos = new ObjectOutputStream(destClient.getSocket().getOutputStream());
+                    oos.writeObject(msg); // Write message to stream
+                } catch (IOException e1) {
+                    JOptionPane.showMessageDialog(this, "An error occurred when sending message: "+e1, "Error", JOptionPane.ERROR_MESSAGE);
+                }
 			}
 		}
     }
@@ -131,11 +140,77 @@ public class GUI extends JFrame implements ActionListener {
         btnConnect.setEnabled(false); // Disable connect after client connected
         try {
             Socket socket = new Socket(HOST_NAME, PORT);
-            Client client = new Client(userName, socket.getInetAddress().getHostAddress(), socket);
+            client = new Client(userName, socket);
             System.out.println(socket.getInetAddress().getHostAddress());
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
+    }
+    // Update client list periodically
+    private class UpdateClientList implements Runnable {
+
+        @Override
+        public void run() {
+            Socket socket = client.getSocket();
+            try {
+                // Create streams
+                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                do {
+                    // Write a JList into stream
+                    oos.writeObject(list);
+                    // Retrieve updated list from server
+                    list = (JList<Client>) ois.readObject();
+                    Thread.sleep(500); // Wait every half second
+                } while (!closing); // End loop when client closes
+            } catch (IOException | ClassNotFoundException | InterruptedException e) {
+                System.err.println("Error updating client list: " + e);
+            }
+            
+        }
+        
+    }
+
+    @Override
+    public void windowClosing(WindowEvent e) {
+
+    }
+
+    // Rest useless methods
+    @Override
+    public void windowOpened(WindowEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void windowClosed(WindowEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void windowIconified(WindowEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void windowDeiconified(WindowEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void windowActivated(WindowEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void windowDeactivated(WindowEvent e) {
+        // TODO Auto-generated method stub
+
     }
 }
