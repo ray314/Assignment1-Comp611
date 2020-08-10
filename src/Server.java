@@ -35,32 +35,6 @@ public class Server {
         list = new JList<>(model);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-    public JList<Client> getClientList() {
-        return list;
-    }
-    /**
-     * Sends a message to a client. This method is synchronized.
-     * @param userName - Username
-     * @param ipAddress - IP address
-     * @param message - Message
-     */
-    public void sendToOneClient(String userName, String ipAddress, String message) {
-        synchronized(this) {
-            Client client = map.get(userName + ":" + ipAddress);
-
-            Socket socket = client.getSocket();
-            
-            // Sending the response back to the client
-            try {
-                PrintWriter pw = new PrintWriter(socket.getOutputStream());
-                pw.println(client.toString()+ ": " + message);
-                socket.close();
-                pw.close();
-            } catch (IOException e) {
-                System.err.println("An error occured: "+e);
-            }
-        }
-    }
 
     // start the server if not already started and repeatedly listen
     // for client connections until stop requested
@@ -108,10 +82,10 @@ public class Server {
             ObjectOutputStream oos;
             ObjectInputStream ois;
             try {
-                // Create input stream
-                ois = new ObjectInputStream(socket.getInputStream());
-                // Receive input and send while client is up
                 do {
+                    // Create input stream
+                    ois = new ObjectInputStream(socket.getInputStream());
+                    // Receive input and send while client is up
                     Object serverResponse = ois.readObject();
                     // Check what object did the server receive
                     if (serverResponse instanceof SendMessage) {

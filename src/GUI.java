@@ -142,11 +142,17 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         btnSend.setEnabled(true);
         btnConnect.setEnabled(false); // Disable connect after client connected
         try {
+            // Create socket and client
             Socket socket = new Socket(HOST_NAME, PORT);
             client = new Client(userName, socket);
+            // Create stream
+            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+            oos.writeObject(client); // Write client to stream
             // Create a new thread then run update
             Thread thread = new UpdateClientList();
+            Thread thread2 = new InnerReceive();
             thread.start();
+            thread2.start();
             
         } catch (IOException e1) {
             // TODO Auto-generated catch block
@@ -160,8 +166,9 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             Socket socket = client.getSocket();
             try {
                 // Create streams
-                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                ObjectInputStream ois;
                 do {
+                    ois = new ObjectInputStream(socket.getInputStream());
                     // Retrieve messages from server
                     Object serverResponse = ois.readObject();
                     if (serverResponse instanceof SendMessage) {
@@ -176,7 +183,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                 // Close stream
                 ois.close();
             } catch (IOException | ClassNotFoundException e) {
-                System.err.println("Error updating client list: " + e);
+                System.err.println("Error receiving messages: " + e);
             }
         }
     }
@@ -189,13 +196,13 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             try {
                 // Create streams
                 ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                ObjectInputStream ois;
                 do {
                     // Write a JList into stream
                     oos.writeObject(list);
                     // Retrieve updated list from server
-                    list = (JList<Client>) ois.readObject();
-                    System.out.println("updating");
+                    ois = new ObjectInputStream(socket.getInputStream());
+                    list = (JList) ois.readObject();
                     Thread.sleep(500); // Wait every half second
                 } while (!closing); // End loop when client closes
                 // Close streams
