@@ -28,6 +28,8 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     private final String HOST_NAME = "192.168.1.69";
     private final int PORT = 7777;
     private boolean closing; // Check if GUI closed
+    private ObjectInputStream ois;
+    private ObjectOutputStream oos;
 
     public String userName;
 
@@ -127,6 +129,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                 try {
                     ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
                     oos.writeObject(msg); // Write message to stream
+                    oos.flush();
                     textField.setText(""); // Clear text field
                 } catch (IOException e1) {
                     JOptionPane.showMessageDialog(this, "An error occurred when sending message: "+e1, "Error", JOptionPane.ERROR_MESSAGE);
@@ -149,6 +152,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             // Create stream
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             oos.writeObject(client); // Write client to stream
+            oos.flush();
             // Create a new thread then run update
             Thread thread = new UpdateClientList();
             //Thread thread2 = new InnerReceive();

@@ -95,7 +95,7 @@ public class Server {
                     } else if (serverResponse instanceof JList) { // Send in the client list
                         oos = new ObjectOutputStream(socket.getOutputStream());
                         oos.writeObject(list); // Write list into stream
-                        //oos.close();
+                        oos.flush();
                     }
                     // Close streams when finished
                     //ois.close();
