@@ -41,6 +41,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     protected JButton btnConnect;
     protected JButton btnSend;
     protected Client client;
+    protected Socket socket;
 
     /**
      * Launch the application.
@@ -124,7 +125,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                 // Create message
                 SendMessage msg = new SendMessage(userName, destClient.getIPAddress(), destClient.toString(), textField.getText());
                 try {
-                    ObjectOutputStream oos = new ObjectOutputStream(destClient.getSocket().getOutputStream());
+                    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
                     oos.writeObject(msg); // Write message to stream
                     textField.setText(""); // Clear text field
                 } catch (IOException e1) {
@@ -143,8 +144,8 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         btnConnect.setEnabled(false); // Disable connect after client connected
         try {
             // Create socket and client
-            Socket socket = new Socket(HOST_NAME, PORT);
-            client = new Client(userName, socket);
+            this.socket = new Socket(HOST_NAME, PORT);
+            client = new Client(userName);
             // Create stream
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             oos.writeObject(client); // Write client to stream
@@ -163,7 +164,6 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     private class InnerReceive extends Thread {
         @Override
         public void run() {
-            Socket socket = client.getSocket();
             try {
                 // Create streams
                 ObjectInputStream ois;
@@ -192,7 +192,6 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     private class UpdateClientList extends Thread {
         @Override
         public void run() {
-            Socket socket = client.getSocket();
             try {
                 // Create streams
                 ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());

@@ -20,9 +20,9 @@ public class Server {
     public final static Server server = new Server();
     public final static int PORT = 7777; // Port number
 
-    // Create a HashMap to store clients
-    // Map clients to username + ipaddress
-    private HashMap<String, Client> map;
+    // Create a HashMap to store sockets
+    // Map sockets to ip addresses
+    private HashMap<String, Socket> map;
     private DefaultListModel<Client> model;
     // Client list
     private JList<Client> list;
@@ -113,7 +113,7 @@ public class Server {
             Client client = (Client) serverResponse;
             client.setIPAddress(socket.getInetAddress().getHostAddress());
             // Put client into the hash map
-            map.put(client.toString() + ":" + client.getIPAddress(), client);
+            map.put(client.getIPAddress(), socket);
             // Add client to JList
             model.addElement(client);
         }
@@ -126,7 +126,7 @@ public class Server {
             String destUserName = sendMsg.getDestUserName();
             String destIPAddress = sendMsg.getIPAddress();
             // Create new message object
-            Socket destSocket = map.get(destUserName + ":" + destIPAddress).getSocket();
+            Socket destSocket = map.get(destIPAddress);
             // Create output stream for destination socket
             oos = new ObjectOutputStream(destSocket.getOutputStream());
             // Write object to stream

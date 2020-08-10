@@ -6,7 +6,6 @@ import java.net.Socket;
 public class Client implements Serializable{
     private String userName;
     private String ipAddress;
-    private Socket socket;
 
     /**
      * Creates a client instance
@@ -14,17 +13,8 @@ public class Client implements Serializable{
      * @param ipAddress - IP address
      * @param socket - Socket
      */
-    public Client (String userName, Socket socket) {
+    public Client (String userName) {
         this.userName = userName;
-        this.socket = socket;
-    }
-
-    /**
-     * Returns the socket for this client
-     * @return Socket
-     */
-    public Socket getSocket() {
-        return this.socket;
     }
 
     /**
