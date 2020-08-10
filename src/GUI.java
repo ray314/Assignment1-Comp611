@@ -141,7 +141,10 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         try {
             Socket socket = new Socket(HOST_NAME, PORT);
             client = new Client(userName, socket);
-            System.out.println(socket.getInetAddress().getHostAddress());
+            // Create a new thread then run update
+            UpdateClientList update = new UpdateClientList();
+            Thread thread = new Thread(update);
+            thread.start();
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
