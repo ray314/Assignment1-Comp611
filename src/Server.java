@@ -95,26 +95,19 @@ public class Server {
                     } else if (serverResponse instanceof JList) { // Send in the client list
                         oos = new ObjectOutputStream(socket.getOutputStream());
                         oos.writeObject(list); // Write list into stream
-                        oos.close();
+                        //oos.close();
                     }
                     // Close streams when finished
-                    ois.close();
+                    //ois.close();
                 }
+                oos.close();
+                ois.close();
             } catch (IOException e) {
                 System.err.println("An error occured: " + e);
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 System.err.println("Class not found: " + e);
-            } finally {
-                if (ois != null) {
-                    try {
-                        ois.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            }
+            } 
             
         }
         // Add client to map and Jlist
