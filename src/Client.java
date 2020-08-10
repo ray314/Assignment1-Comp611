@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -98,8 +97,6 @@ public class Client {
             isOpen = true;
             // Send this client's name to server to add to clientList
             pw.println(name + "@" + socket.getInetAddress());
-            // Close stream
-            pw.close();
             InnerReceive receive = new InnerReceive();
             Thread thread = new Thread(receive);
             thread.start();

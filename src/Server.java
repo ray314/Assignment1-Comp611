@@ -39,7 +39,10 @@ public class Server {
        clientList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
        clientList.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
     }
-
+    /**
+     * Returns a server instance
+     * @return Server object
+     */
     public static Server getInstance() {
         if (instance == null) {
             synchronized(Server.class) { // Synchronize so concurrent 
@@ -50,6 +53,16 @@ public class Server {
             }   
         }
         return instance;
+    }
+    /**
+     * Returns a Client instance
+     * @param username - The username
+     * @param ipAddress - The IP address
+     * @param socket - The socket
+     * @return
+     */
+    public static Client getClient(String username, String ipAddress, Socket socket) {
+
     }
  
     /**
