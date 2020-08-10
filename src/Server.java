@@ -95,11 +95,13 @@ public class Server {
                     } else if (serverResponse instanceof JList) { // Send in the client list
                         oos = new ObjectOutputStream(socket.getOutputStream());
                         oos.writeObject(list); // Write list into stream
+                        oos.close();
                     }
-
+                    // Close streams when finished
+                    ois.close();
                 } while(!socket.isClosed());
-                // Close streams when finished
-                ois.close();
+                
+                
             } catch (IOException e) {
                 System.err.println("An error occured: " + e);
             } catch (ClassNotFoundException e) {
@@ -131,6 +133,8 @@ public class Server {
             oos = new ObjectOutputStream(destSocket.getOutputStream());
             // Write object to stream
             oos.writeObject(sendMsg);
+            //Close stream
+            oos.close();
         }
     }
 }

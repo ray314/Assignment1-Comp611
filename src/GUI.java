@@ -179,11 +179,12 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                         // Set text area
                         textArea.setText(message);
                     }
+                    // Close stream
+                    ois.close();
                 } while (!closing); // End loop when client closes
-                // Close stream
-                ois.close();
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Error receiving messages: " + e);
+                e.printStackTrace();
             }
         }
     }
@@ -193,26 +194,31 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         @Override
         public void run() {
             try {
-                // Create streams
-                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                ObjectInputStream ois;
+                
                 do {
+                    // Create streams
+                    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                    ObjectInputStream ois;
                     // Write a JList into stream
                     oos.writeObject(list);
+                    oos.close();
                     // Retrieve updated list from server
                     ois = new ObjectInputStream(socket.getInputStream());
-                    list = (JList) ois.readObject();
+                    list = (JList<Client>) ois.readObject();
+                    // Close streams
+                    ois.close();
                     Thread.sleep(500); // Wait every half second
                 } while (!closing); // End loop when client closes
-                // Close streams
-                oos.close();
-                ois.close();
+                
             } catch (IOException e) {
                 System.err.println("Error updating client list: " + e);
+                e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 System.err.println("Class not found: " + e);
+                e.printStackTrace();
             } catch (InterruptedException e) {
                 System.err.println("Interrupted: " + e);
+                e.printStackTrace();
             }
         }
     }
