@@ -150,9 +150,10 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             this.socket = new Socket(HOST_NAME, PORT);
             client = new Client(userName);
             // Create stream
-            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-            oos.writeObject(client); // Write client to stream
-            oos.flush();
+            this.oos = new ObjectOutputStream(socket.getOutputStream());
+            this.oos.writeObject(client); // Write client to stream
+            this.oos.flush();
+            this.oos.reset();
             // Create a new thread then run update
             Thread thread = new UpdateClientList();
             //Thread thread2 = new InnerReceive();
@@ -198,20 +199,24 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         public void run() {
             ObjectInputStream ois = null;
             try {
+                // Write a JList into stream
+                oos.writeObject(list);
+                oos.flush();
+                oos.reset();
+                // Retrieve updated list from server
+                ois = new ObjectInputStream(socket.getInputStream());
                 do {
-                    // Create streams
-                    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                    
-                    // Write a JList into stream
                     oos.writeObject(list);
-                    oos.close();
-                    // Retrieve updated list from server
-                    ois = new ObjectInputStream(socket.getInputStream());
+                    oos.flush();
+                    oos.reset();
                     list = (JList<Client>) ois.readObject();
                     // Close streams
-                    ois.close();
                     System.out.println("test");
                     Thread.sleep(500); // Wait every half second
+                    // Write a JList into stream
+                    oos.writeObject(list);
+                    oos.flush();
+                    oos.reset();
                 } while (!closing); // End loop when client closes
                 
             } catch (IOException e) {

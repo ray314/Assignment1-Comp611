@@ -80,11 +80,11 @@ public class Server {
         public void run() {
             // Create object output and input streams
             ObjectOutputStream oos = null;
-            ObjectInputStream ois = null;
+            // Create input stream
             try {
+                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                 while (!stopRequested) {
-                    // Create input stream
-                    ois = new ObjectInputStream(socket.getInputStream());
+                    
                     // Receive input and send while client is up
                     Object serverResponse = ois.readObject();
                     // Check what object did the server receive
