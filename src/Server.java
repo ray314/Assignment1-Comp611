@@ -21,7 +21,7 @@ public class Server {
     // Map sockets to ip addresses
     private HashMap<String, Socket> map;
     private DefaultListModel<Client> model;
-    // Client list
+    // Client listthis.ois = new ObjectInputStream(socket.getInputStream());
     private JList<Client> list;
     private boolean stopRequested; // Stop the server
 

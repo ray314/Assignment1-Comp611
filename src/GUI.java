@@ -153,7 +153,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             this.oos = new ObjectOutputStream(socket.getOutputStream());
             this.oos.writeObject(client); // Write client to stream
             this.oos.flush();
-            this.oos.reset();
+            //this.oos.reset();
             // Create a new thread then run update
             Thread thread = new UpdateClientList();
             //Thread thread2 = new InnerReceive();
@@ -197,33 +197,26 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     private class UpdateClientList extends Thread {
         @Override
         public void run() {
-            ObjectInputStream ois = null;
             try {
-                // Write a JList into stream
-                oos.writeObject(list);
-                oos.flush();
-                oos.reset();
-                // Retrieve updated list from server
                 ois = new ObjectInputStream(socket.getInputStream());
                 do {
                     oos.writeObject(list);
                     oos.flush();
-                    oos.reset();
-                    list = (JList<Client>) ois.readObject();
+                    //oos.reset();
+                    // Retrieve updated list from server
+                    //list = (JList<Client>) ois.readObject();
                     // Close streams
                     System.out.println("test");
                     Thread.sleep(500); // Wait every half second
                     // Write a JList into stream
                     oos.writeObject(list);
                     oos.flush();
-                    oos.reset();
+                    //oos.reset();
                 } while (!closing); // End loop when client closes
                 
             } catch (IOException e) {
                 System.err.println("Error updating client list: " + e);
                 e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                System.err.println("Class not found: " + e);
             } catch (InterruptedException e) {
                 System.err.println("Interrupted: " + e);
             } finally {
