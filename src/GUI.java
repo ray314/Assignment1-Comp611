@@ -15,6 +15,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -108,8 +109,9 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         southPanel.add(btnSend);
 
         textArea = new JTextArea();
+        JScrollPane scroll = new JScrollPane(textArea);
         textArea.setEditable(false);
-        this.getContentPane().add(textArea, BorderLayout.CENTER);
+        this.getContentPane().add(scroll, BorderLayout.CENTER);
 
     }
 
@@ -121,30 +123,35 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             // Connect to server
             connect();
 		} else if (source == btnSend) {
-            Client destClient = list.getSelectedValue();
-            String text = textField.getText();
-			if (!text.equals("") && destClient != null) {
-                // Create message
-                PrivateMessage msg = new PrivateMessage(userName, destClient.getIPAddress(), destClient.toString(), text);
-                try {
-                    oos.writeObject(msg); // Write message to stream
-                    oos.flush();
-                    textField.setText(""); // Clear text field
-                } catch (IOException e1) {
-                    JOptionPane.showMessageDialog(this, "An error occurred when sending message: "+e1, "Error", JOptionPane.ERROR_MESSAGE);
-                }
-			} else if (!text.equals("")){
-                try {
-                    Post post = new Post(client.toString(), text);
-                    oos.writeObject(post);
-                    oos.flush();
-                    
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
+            sendMessage();
 		}
+    }
+    // Send message to specific client or post to everyone
+    private void sendMessage() {
+        Client destClient = list.getSelectedValue();
+        String text = textField.getText();
+        if (!text.equals("") && destClient != null) {
+            // Create message
+            PrivateMessage msg = new PrivateMessage(userName, destClient.getIPAddress(), destClient.toString(), text);
+            try {
+                oos.writeObject(msg); // Write message to stream
+                oos.flush();
+            } catch (IOException e1) {
+                JOptionPane.showMessageDialog(this, "An error occurred when sending message: "+e1, "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            // Send to all
+        } else if (!text.equals("")){
+            try {
+                Post post = new Post(client.toString(), text);
+                oos.writeObject(post);
+                oos.flush();
+                
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        }
+        textField.setText(""); // Clear text field
     }
     
     private void connect() {

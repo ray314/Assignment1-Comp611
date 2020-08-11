@@ -7,8 +7,10 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -19,16 +21,19 @@ public class Server {
     public final static Server server = new Server();
     public final static int PORT = 7777; // Port number
 
-    // Create a HashMap to store sockets
+    // Create a HashsocketMap to store sockets
     // Map sockets to ip addresses
-    private HashMap<String, Socket> map;
+    private HashMap<String, Socket> socketMap;
+    // List to store all rooms
+    private List<Room> roomList;
     private DefaultListModel<Client> model;
     // Client listthis.ois = new ObjectInputStream(socket.getInputStream());
     private JList<Client> list;
     private boolean stopRequested; // Stop the server
 
     private Server() {
-        map = new HashMap<>();
+        socketMap = new HashMap<>();
+        roomList = new ArrayList<Room>();
         stopRequested = false;
         model = new DefaultListModel<>();
         list = new JList<>(model);
@@ -53,10 +58,11 @@ public class Server {
             Socket socket = serverSocket.accept();
             System.out.println("Connection made with " + socket.getInetAddress());
             //Client client = new Client(socket.getInetAddress().getHostName(), socket.getInetAddress().getHostAddress(), socket);
-            //map.put(client.toString() + ":" + client.getIPAddress(), client);
+            //socketMap.put(client.toString() + ":" + client.getIPAddress(), client);
             
             Room room = new Room(socket);
             Thread thread = new Thread(room);
+            roomList.add(room);
             thread.start();
             }
             serverSocket.close();
@@ -65,6 +71,14 @@ public class Server {
        {  System.err.println("Can't accept client connection: " + e);
        }
        System.out.println("Server finishing");
+    }
+    // Send to all clients currently connected
+    private void sendToAll(Message message) throws IOException {
+        System.out.println("sendToAll called");
+        Iterator<Room> it = roomList.iterator();
+        while(it.hasNext()) {
+            it.next().sendToClient(message);
+        }
     }
 
     private class Room implements Runnable{
@@ -83,6 +97,7 @@ public class Server {
             } catch (IOException e) {
                 System.err.println("An error occured when creating streams");
                 e.printStackTrace();
+                
             }
         }
 
@@ -90,8 +105,6 @@ public class Server {
         public void run() {
             try {
                 while (!stopRequested) {
-                    
-                    System.out.println("Test");
                     // Receive input and send while client is up
                     Object serverResponse = ois.readObject();
                     // Check what object did the server receive
@@ -102,7 +115,7 @@ public class Server {
                     } else if (serverResponse instanceof JList) { // Send in the client list
                         updateJList();
                     } else if (serverResponse instanceof Post) { // Send to all
-                        sendToAll(serverResponse);
+                        sendToAll((Post) serverResponse);
                     }
                 }
                 oos.close();
@@ -111,36 +124,34 @@ public class Server {
                 System.err.println("A client has disconnected");
                 // Remove client and socket
                 model.removeElement(client);
-                map.remove(client.getIPAddress());
+                socketMap.remove(client.getIPAddress());
             } catch (ClassNotFoundException e) {
                 System.err.println("Class not found: " + e);
             } catch (IOException e) {
                 System.err.println("I/O error"+e);
             } 
         }
-
-        private void sendToAll(Object serverResponse) throws IOException {
-            for (Map.Entry<String,Socket> entry : map.entrySet()) {
-                ObjectOutputStream oos = new ObjectOutputStream(entry.getValue().getOutputStream());
-                Post post = (Post) serverResponse;
-                oos.writeObject(post);
-                oos.flush();
-                oos.reset();
+        // Send a message to this client
+        private void sendToClient(Message message) {
+            try {
+                oos.writeObject(message);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                System.err.println("An error occured when sending to client: " + e);
             }
         }
 
         private void updateJList() throws IOException {
             oos.writeObject(list); // Write list into stream
             oos.flush();
-            oos.reset();
         }
-        // Add client to map and Jlist
+        // Add client to socketMap and Jlist
         private void addClient(Object serverResponse) {
             // Typecast into Client object
             Client client = (Client) serverResponse;
             client.setIPAddress(socket.getInetAddress().getHostAddress());
-            // Put client into the hash map
-            map.put(client.getIPAddress(), socket);
+            // Put client into the hash socketMap
+            socketMap.put(client.getIPAddress(), socket);
             this.client = client;
             // Add client to JList
             model.addElement(client);
@@ -153,7 +164,7 @@ public class Server {
             // Obtain message details
             String destIPAddress = sendMsg.getIPAddress();
             // Create new message object
-            Socket destSocket = map.get(destIPAddress);
+            Socket destSocket = socketMap.get(destIPAddress);
             // Create output stream for destination socket
             oos = new ObjectOutputStream(destSocket.getOutputStream());
             // Write object to stream
@@ -162,5 +173,8 @@ public class Server {
             oos.flush();
             oos.reset();
         }
+    }
+    public static void main(String[] args) {
+        Server.server.startServer();
     }
 }
