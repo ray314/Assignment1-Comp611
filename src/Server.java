@@ -6,7 +6,9 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -68,6 +70,7 @@ public class Server {
     private class Room implements Runnable{
 
         private Socket socket;
+        private Client client;
         // Streams
         private ObjectOutputStream oos;
         private ObjectInputStream ois;
@@ -92,26 +95,44 @@ public class Server {
                     // Receive input and send while client is up
                     Object serverResponse = ois.readObject();
                     // Check what object did the server receive
-                    if (serverResponse instanceof SendMessage) {
+                    if (serverResponse instanceof PrivateMessage) {
                         forwardMessage(serverResponse);
                     } else if (serverResponse instanceof Client) { // Retrieve client details
                         addClient(serverResponse);
                     } else if (serverResponse instanceof JList) { // Send in the client list
-                        oos = new ObjectOutputStream(socket.getOutputStream());
-                        oos.writeObject(list); // Write list into stream
-                        oos.flush();
-                        oos.reset();
+                        updateJList();
+                    } else if (serverResponse instanceof Post) { // Send to all
+                        sendToAll(serverResponse);
                     }
                 }
                 oos.close();
                 //ois.close();
-            } catch (IOException e) {
-                System.err.println("An error occured: " + e);
-                e.printStackTrace();
+            } catch (SocketException e) {
+                System.err.println("A client has disconnected");
+                // Remove client and socket
+                model.removeElement(client);
+                map.remove(client.getIPAddress());
             } catch (ClassNotFoundException e) {
                 System.err.println("Class not found: " + e);
+            } catch (IOException e) {
+                System.err.println("I/O error"+e);
+            } 
+        }
+
+        private void sendToAll(Object serverResponse) throws IOException {
+            for (Map.Entry<String,Socket> entry : map.entrySet()) {
+                ObjectOutputStream oos = new ObjectOutputStream(entry.getValue().getOutputStream());
+                Post post = (Post) serverResponse;
+                oos.writeObject(post);
+                oos.flush();
+                oos.reset();
             }
-            
+        }
+
+        private void updateJList() throws IOException {
+            oos.writeObject(list); // Write list into stream
+            oos.flush();
+            oos.reset();
         }
         // Add client to map and Jlist
         private void addClient(Object serverResponse) {
@@ -120,16 +141,16 @@ public class Server {
             client.setIPAddress(socket.getInetAddress().getHostAddress());
             // Put client into the hash map
             map.put(client.getIPAddress(), socket);
+            this.client = client;
             // Add client to JList
             model.addElement(client);
         }
         // Forward the message to the destination client
         private void forwardMessage(Object serverResponse) throws IOException {
             ObjectOutputStream oos;
-            // Typecast into SendMessage object
-            SendMessage sendMsg = (SendMessage) serverResponse;
+            // Typecast into PrivateMessage object
+            PrivateMessage sendMsg = (PrivateMessage) serverResponse;
             // Obtain message details
-            String destUserName = sendMsg.getDestUserName();
             String destIPAddress = sendMsg.getIPAddress();
             // Create new message object
             Socket destSocket = map.get(destIPAddress);

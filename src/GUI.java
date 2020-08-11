@@ -25,10 +25,9 @@ import javax.swing.JLabel;
  */
 public class GUI extends JFrame implements ActionListener, WindowListener {
 
-    private final String HOST_NAME = "192.168.1.69";
+    private final String HOST_NAME = "172.28.44.120";
     private final int PORT = 7777;
     private boolean closing; // Check if GUI closed
-    private ObjectInputStream ois;
     private ObjectOutputStream oos;
 
     public String userName;
@@ -122,19 +121,29 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             // Connect to server
             connect();
 		} else if (source == btnSend) {
-			Client destClient = list.getSelectedValue();
-			if (!textField.getText().equals("") && destClient != null) {
+            Client destClient = list.getSelectedValue();
+            String text = textField.getText();
+			if (!text.equals("") && destClient != null) {
                 // Create message
-                SendMessage msg = new SendMessage(userName, destClient.getIPAddress(), destClient.toString(), textField.getText());
+                PrivateMessage msg = new PrivateMessage(userName, destClient.getIPAddress(), destClient.toString(), text);
                 try {
-                    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
                     oos.writeObject(msg); // Write message to stream
                     oos.flush();
                     textField.setText(""); // Clear text field
                 } catch (IOException e1) {
                     JOptionPane.showMessageDialog(this, "An error occurred when sending message: "+e1, "Error", JOptionPane.ERROR_MESSAGE);
                 }
-			}
+			} else if (!text.equals("")){
+                try {
+                    Post post = new Post(client.toString(), text);
+                    oos.writeObject(post);
+                    oos.flush();
+                    
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
 		}
     }
     
@@ -155,10 +164,10 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             this.oos.flush();
             //this.oos.reset();
             // Create a new thread then run update
-            Thread thread = new UpdateClientList();
-            //Thread thread2 = new InnerReceive();
-            thread.start();
-            //thread2.start();
+            //Thread thread = new UpdateClientList();
+            Thread thread2 = new InnerReceive();
+            //thread.start();
+            thread2.start();
             
         } catch (IOException e1) {
             // TODO Auto-generated catch block
@@ -171,29 +180,37 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         public void run() {
             try {
                 // Create streams
-                ObjectInputStream ois;
+                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                 do {
-                    ois = new ObjectInputStream(socket.getInputStream());
                     // Retrieve messages from server
                     Object serverResponse = ois.readObject();
-                    if (serverResponse instanceof SendMessage) {
-                        // Typecast into SendMessage
-                        SendMessage sendMsg = (SendMessage) serverResponse;
-                        // Get text area and add new text in new line
-                        String message = textArea.getText() + "\n" + sendMsg.getOrigUserName() + ": " + sendMsg.getMessage();
-                        // Set text area
-                        textArea.setText(message);
-                    }
-                    // Close stream
-                    ois.close();
+                    if (serverResponse instanceof PrivateMessage ||
+                        serverResponse instanceof Post) {
+                        displayMessage(serverResponse);
+                    } 
+                    
                 } while (!closing); // End loop when client closes
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Error receiving messages: " + e);
             }
         }
+
+        private void displayMessage(Object serverResponse) {
+            // Typecast into PrivateMessage or Post
+            Message msg;
+            if (serverResponse instanceof PrivateMessage) {
+                msg = (PrivateMessage) serverResponse;
+            } else {
+                msg = (Post) serverResponse;
+            }
+            // Get text area and add new text in new line
+            String message = textArea.getText() + "\n" + msg.getOrigUserName() + ": " + msg.getMessage();
+            // Set text area
+            textArea.setText(message);
+        }
     }
 
-    // Update client list periodically
+    /* Update client list periodically
     private class UpdateClientList extends Thread {
         @Override
         public void run() {
@@ -230,7 +247,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                 }
             }
         }
-    }
+    }*/
 
     @Override
     public void windowClosing(WindowEvent e) {
