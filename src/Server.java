@@ -27,8 +27,7 @@ public class Server {
     // List to store all rooms
     private List<Room> roomList;
     // List to store all clients
-    private ArrayList<Client> list;
-    private DefaultListModel<Client> model;
+    private List<Client> list;
     private boolean stopRequested; // Stop the server
 
     private Server() {
@@ -72,7 +71,7 @@ public class Server {
     }
     // Send to all clients currently connected
     private void sendToAll(Object message) throws IOException {
-        System.out.println(model.getSize());
+        System.out.println(list.size());
         Iterator<Room> it = roomList.iterator();
         while(it.hasNext()) {
             it.next().sendToClient(message);
@@ -119,13 +118,13 @@ public class Server {
             } catch (SocketException e) {
                 System.err.println("A client has disconnected");
                 // Remove client and socket
-                model.removeElement(client);
+                list.remove(client);
                 socketMap.remove(client.getIPAddress());
                 // Remove room from ArrayList
                 roomList.remove(this);
                 // Update JList by updating model
                 try {
-                    sendToAll(model);
+                    sendToAll(list);
                 } catch (IOException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
@@ -153,10 +152,10 @@ public class Server {
             // Put client into the hash socketMap
             socketMap.put(client.getIPAddress(), socket);
             this.client = client;
-            // Add client to JList
-            model.addElement(client);
-            // Update JList by sending model
-            sendToAll(model);
+            // Add client to list
+            list.add(client);
+            // Update all client's JList
+            sendToAll(list);
         }
         // Forward the message to the destination client
         private void forwardMessage(Object serverResponse) throws IOException {

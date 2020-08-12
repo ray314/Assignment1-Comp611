@@ -9,6 +9,13 @@
             "name": "CodeLens (Launch) - Server",
             "request": "launch",
             "mainClass": "src.Server",
+            "projectName": "Assignment1-Comp611_3dbf821a"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Server",
+            "request": "launch",
+            "mainClass": "src.Server",
             "projectName": "Assignment1-Comp611_7a2e98e6"
         },
         {

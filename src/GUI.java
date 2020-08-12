@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -28,11 +31,10 @@ import javax.swing.JLabel;
  */
 public class GUI extends JFrame implements ActionListener, WindowListener {
 
-    private final String HOST_NAME = "172.28.44.120";
+    private final String HOST_NAME = "192.168.1.78";
     private final int PORT = 7777;
     private boolean closing; // Check if GUI closed
     private ObjectOutputStream oos;
-
     public String userName;
 
     protected JTextField textField;
@@ -42,7 +44,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     protected JPanel northPanel;
     protected JLabel lblTitle;
     protected DefaultListModel<Client> model;
-    protected JList<Client> list;
+    protected JList<Client> listView;
     protected JButton btnConnect;
     protected JButton btnSend;
     protected JButton btnPost;
@@ -94,9 +96,9 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         eastPanel.setLayout(new GridLayout(0, 1, 0, 0));
         // List of connected clients
         model = new DefaultListModel<>();
-        list = new JList<>(model);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        eastPanel.add(list);
+        listView = new JList<>(model);
+        listView.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        eastPanel.add(listView);
 
         btnConnect = new JButton("Connect");
         btnConnect.addActionListener(this);
@@ -136,12 +138,12 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 		} else if (source == btnSend) {
             sendMessage();
 		} else if (source == btnPost) {
-            list.clearSelection();
+            listView.clearSelection();
         }
     }
     // Send message to specific client or post to everyone
     private void sendMessage() {
-        Client destClient = list.getSelectedValue();
+        Client destClient = listView.getSelectedValue();
         String text = textField.getText();
         if (!text.equals("") && destClient != null) {
             // Create message
@@ -179,13 +181,9 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             // Create socket and client
             this.socket = new Socket(HOST_NAME, PORT);
             client = new Client(userName);
-            // Create stream
-            this.oos = new ObjectOutputStream(socket.getOutputStream());
-            this.oos.writeObject(client); // Write client to stream
-            this.oos.flush();
-            Thread thread2 = new InnerReceive();
-            //thread.start();
-            thread2.start();
+            oos = new ObjectOutputStream(socket.getOutputStream()); // Output stream for this client
+            Thread thread = new InnerReceive();
+            thread.start();
             
         } catch (IOException e1) {
             // TODO Auto-generated catch block
@@ -199,21 +197,30 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             try {
                 // Create streams
                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                oos.writeObject(client); // Write client to stream
                 do {
                     // Retrieve messages from server
                     Object serverResponse = ois.readObject();
                     if (serverResponse instanceof PrivateMessage ||
                         serverResponse instanceof Post) {
                         displayMessage(serverResponse);
-                    } else if (serverResponse instanceof DefaultListModel) {
-                        // Update JList
-                        System.out.println(model.getSize());
-                        model = (DefaultListModel<Client>) serverResponse;
+                    } else if (serverResponse instanceof List) {
+                        updateJList(serverResponse);
                     }
                     
                 } while (!closing); // End loop when client closes
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Error receiving messages: " + e);
+            }
+        }
+
+        private void updateJList(Object serverResponse) {
+            // Update JList
+            List<Client> list = (List) serverResponse;
+            model.clear(); // Clear the model
+            Iterator<Client> it = list.iterator();
+            while(it.hasNext()) { // Iterate through the list and replace model elements
+                model.addElement(it.next());
             }
         }
 
