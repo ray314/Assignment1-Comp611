@@ -161,10 +161,10 @@ public class Server {
             String destIPAddress = sendMsg.getIPAddress();
             // Obtain the destination stream
             ObjectOutputStream destOOS = map.get(destIPAddress); 
-            // Write object to stream
+            // Write message to destination stream
             destOOS.writeObject(sendMsg);
-            // Reset stream marker back to start
-            destOOS.reset();
+            // Also write message to origin stream
+            oos.writeObject(sendMsg);
         }
     }
     public static void main(String[] args) {

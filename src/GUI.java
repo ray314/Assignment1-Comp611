@@ -131,7 +131,6 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             PrivateMessage msg = new PrivateMessage(userName, destClient.getIPAddress(), destClient.toString(), text);
             try {
                 oos.writeObject(msg); // Write message to stream
-                oos.flush();
             } catch (IOException e1) {
                 JOptionPane.showMessageDialog(this, "An error occurred when sending message: "+e1, "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -144,7 +143,6 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         try {
             Post post = new Post(client.toString(), textField.getText());
             oos.writeObject(post);
-            oos.reset();
             textField.setText(""); // Clear text field
             
         } catch (IOException e1) {
