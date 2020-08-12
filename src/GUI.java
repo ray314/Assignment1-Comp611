@@ -1,34 +1,34 @@
 package src;
 
-import javax.swing.JFrame;
 import java.awt.BorderLayout;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import java.awt.GridLayout;
-import java.awt.event.*;
-import java.io.ByteArrayOutputStream;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
-import java.awt.image.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * The GUI for the client
@@ -171,11 +171,12 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         // Don't let the user close dialog until name is entered
         dialog.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         dialog.setVisible(true);
-        btnSend.setEnabled(true);
-        btnPost.setEnabled(true);
-        btnSendImage.setEnabled(true);
-        btnConnect.setEnabled(false); // Disable connect after client connected
         try {
+            // Enable the posting/sending buttons
+            btnSend.setEnabled(true);
+            btnPost.setEnabled(true);
+            btnSendImage.setEnabled(true);
+            btnConnect.setEnabled(false); // Disable connect after client connected
             // Create socket and client
             this.socket = new Socket(HOST_NAME, PORT);
             client = new Client(userName);
@@ -183,9 +184,10 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             Thread thread = new InnerReceive();
             thread.start();
             
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (ConnectException e) {
+            System.err.println("Error connecting to server. Please make sure the server is running: " + e);
+        } catch (IOException e) {
+            System.err.println("Error creating output stream: " +e);
         }
     }
     // Send an image to server by byte array
@@ -210,7 +212,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         JFileChooser fChooser = new JFileChooser();
         fChooser.setDialogTitle("Select an image");
         fChooser.setAcceptAllFileFilterUsed(false);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPEG and PNG files", "png", "jpeg");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPEG/JPG and PNG files", "png", "jpeg", "jpg");
         // Add file extension filter to file chooser
         fChooser.addChoosableFileFilter(filter);
         int returnVal = fChooser.showOpenDialog(this);
