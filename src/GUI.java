@@ -196,13 +196,23 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     // Send an image to server by byte array
     private void sendImage(ImageWrapper imageWrapper) throws IOException {
         // Show options
-        String[] options = {"Yes", "No"};
+        String[] options = {"Send to selected client", "Send to all clients"};
         // Ask the user whether to send or post
         String returnString = (String) JOptionPane.showInputDialog(this, "Do you want to send image to client or post to everyone?",
             "Send or Post?", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
         if (returnString.equals(options[0])) {
             // Send to client
-            imageWrapper.setPostBoolean(false);
+            // Check if a client has been selected from the list
+            if (listView.getSelectedValue() != null) {
+                imageWrapper.setPostBoolean(false);
+                // Set the IP address destination
+                imageWrapper.setIPAddress(listView.getSelectedValue().getIPAddress());
+            } else {
+                // Else pop a dialog informing the user that a client has not been selected
+                JOptionPane.showMessageDialog(this, "Please select a client first", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
         } else {
             // Post to all clients
             imageWrapper.setPostBoolean(true);
@@ -225,7 +235,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             // Handle exceptions
             try {
                 // Wrap file into custom image class
-                ImageWrapper imageWrapper = new ImageWrapper(file, client.getIPAddress(), client.toString());
+                ImageWrapper imageWrapper = new ImageWrapper(file, client.toString());
                 // Send the image
                 sendImage(imageWrapper);
             } catch (IOException e) {

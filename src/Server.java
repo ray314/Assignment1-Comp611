@@ -26,6 +26,10 @@ public class Server {
     private List<Client> list;
     private boolean stopRequested; // Stop the server
 
+    public static void main(String[] args) {
+        server.startServer();
+    }
+
     private Server() {
         map = new HashMap<>();
         roomList = new ArrayList<Room>();
@@ -181,8 +185,5 @@ public class Server {
             // Also write message to origin stream
             oos.writeObject(sendMsg);
         }
-    }
-    public static void main(String[] args) {
-        server.startServer();
     }
 }

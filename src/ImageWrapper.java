@@ -1,18 +1,19 @@
 package src;
 
 import java.io.File;
+import java.io.Serializable;
 
 /**
  * CustomImage for representing an image and whether to post or send it as PM
  */
-public class ImageWrapper{
+public class ImageWrapper implements Serializable{
 
     private boolean toPost;
     private File file;
     private String ipAddress;
     private String origUserName;
     
-    public ImageWrapper(File file, String ipAddress, String origUserName) {
+    public ImageWrapper(File file, String origUserName) {
         this.file = file;
         this.ipAddress = ipAddress;
         this.origUserName = origUserName;
@@ -41,6 +42,10 @@ public class ImageWrapper{
 
     public String getIPAddress() {
         return ipAddress;
+    }
+
+    public void setIPAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 
     public String getOrigUserName() {
