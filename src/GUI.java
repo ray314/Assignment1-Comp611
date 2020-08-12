@@ -1,7 +1,5 @@
 package src;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import java.awt.BorderLayout;
 import javax.swing.JTextArea;
@@ -50,23 +48,6 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     protected JButton btnPost;
     protected Client client;
     protected Socket socket;
-
-    /**
-     * Launch the application.
-     */
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    GUI window = new GUI();
-                    window.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
     /**
      * Create the application.
      */
@@ -138,7 +119,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
 		} else if (source == btnSend) {
             sendMessage();
 		} else if (source == btnPost) {
-            listView.clearSelection();
+            sendPost();
         }
     }
     // Send message to specific client or post to everyone
@@ -154,19 +135,22 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             } catch (IOException e1) {
                 JOptionPane.showMessageDialog(this, "An error occurred when sending message: "+e1, "Error", JOptionPane.ERROR_MESSAGE);
             }
-            // Send to all
-        } else if (!text.equals("")){
-            try {
-                Post post = new Post(client.toString(), text);
-                oos.writeObject(post);
-                oos.flush();
-                
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
         }
         textField.setText(""); // Clear text field
+    }
+
+    // Send post to all clients
+    private void sendPost() {
+        try {
+            Post post = new Post(client.toString(), textField.getText());
+            oos.writeObject(post);
+            oos.reset();
+            textField.setText(""); // Clear text field
+            
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            JOptionPane.showMessageDialog(this, "An error occurred when posting: "+e1, "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     private void connect() {
