@@ -12,18 +12,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.ListSelectionModel;
-
 public class Server {
     // Create a new instance of Server
     public final static Server server = new Server();
     public final static int PORT = 7777; // Port number
 
-    // Create a HashsocketMap to store sockets
-    // Map sockets to ip addresses
-    private HashMap<String, Socket> socketMap;
+    // Create a HashMap to store socket's output stream
+    // Map stream to ip address
+    private HashMap<String, ObjectOutputStream> map;
     // List to store all rooms
     private List<Room> roomList;
     // List to store all clients
@@ -31,7 +27,7 @@ public class Server {
     private boolean stopRequested; // Stop the server
 
     private Server() {
-        socketMap = new HashMap<>();
+        map = new HashMap<>();
         roomList = new ArrayList<Room>();
         stopRequested = false;
         list = new ArrayList<>();
@@ -119,7 +115,7 @@ public class Server {
                 System.err.println("A client has disconnected");
                 // Remove client and socket
                 list.remove(client);
-                socketMap.remove(client.getIPAddress());
+                map.remove(client.getIPAddress());
                 // Remove room from ArrayList
                 roomList.remove(this);
                 // Update JList by updating model
@@ -149,8 +145,8 @@ public class Server {
             // Typecast into Client object
             Client client = (Client) serverResponse;
             client.setIPAddress(socket.getInetAddress().getHostAddress());
-            // Put client into the hash socketMap
-            socketMap.put(client.getIPAddress(), socket);
+            // Map output stream to ip address
+            map.put(client.getIPAddress(), oos);
             this.client = client;
             // Add client to list
             list.add(client);
@@ -159,21 +155,19 @@ public class Server {
         }
         // Forward the message to the destination client
         private void forwardMessage(Object serverResponse) throws IOException {
-            ObjectOutputStream oos;
             // Typecast into PrivateMessage object
             PrivateMessage sendMsg = (PrivateMessage) serverResponse;
             // Obtain message details
             String destIPAddress = sendMsg.getIPAddress();
-            // Create new message object
-            Socket destSocket = socketMap.get(destIPAddress);
-            // Create output stream for destination socket
-            oos = new ObjectOutputStream(destSocket.getOutputStream());
+            // Obtain the destination stream
+            ObjectOutputStream destOOS = map.get(destIPAddress); 
             // Write object to stream
-            oos.writeObject(sendMsg);
-            oos.reset();
+            destOOS.writeObject(sendMsg);
+            // Reset stream marker back to start
+            destOOS.reset();
         }
     }
     public static void main(String[] args) {
-        Server.server.startServer();
+        server.startServer();
     }
 }

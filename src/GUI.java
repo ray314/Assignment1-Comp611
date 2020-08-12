@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.net.SocketException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -209,8 +209,15 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                     }
                     
                 } while (!closing); // End loop when client closes
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (SocketException e) { // Connection closed, disable post, send buttons and re-enable connect
+                System.err.println("Error with connection. Please connect again");
+                btnSend.setEnabled(false);
+                btnPost.setEnabled(false);
+                btnConnect.setEnabled(true);
+            } catch (IOException e) {
                 System.err.println("Error receiving messages: " + e);
+            } catch (ClassNotFoundException e) {
+                System.err.println("Wrong object type: " + e);
             }
         }
 
