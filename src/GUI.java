@@ -5,9 +5,13 @@ import java.awt.BorderLayout;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.GridLayout;
 import java.awt.event.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.awt.image.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -18,8 +22,10 @@ import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JLabel;
@@ -127,6 +133,8 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             sendMessage();
 		} else if (source == btnPost) {
             sendPost();
+        } else if (source == btnSendImage) {
+            openImage();
         }
     }
     // Send message to specific client or post to everyone
@@ -178,6 +186,46 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
+        }
+    }
+    // Send an image to server by byte array
+    private void sendImage(ImageWrapper imageWrapper) throws IOException {
+        // Show options
+        String[] options = {"Yes", "No"};
+        // Ask the user whether to send or post
+        String returnString = (String) JOptionPane.showInputDialog(this, "Do you want to send image to client or post to everyone?",
+            "Send or Post?", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        if (returnString.equals(options[0])) {
+            // Send to client
+            imageWrapper.setPostBoolean(false);
+        } else {
+            // Post to all clients
+            imageWrapper.setPostBoolean(true);
+        }
+        // Write to stream
+        oos.writeObject(imageWrapper);
+    }
+    // Open image
+    private void openImage() {
+        JFileChooser fChooser = new JFileChooser();
+        fChooser.setDialogTitle("Select an image");
+        fChooser.setAcceptAllFileFilterUsed(false);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPEG and PNG files", "png", "jpeg");
+        // Add file extension filter to file chooser
+        fChooser.addChoosableFileFilter(filter);
+        int returnVal = fChooser.showOpenDialog(this);
+        // When user selected a file
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fChooser.getSelectedFile();
+            // Handle exceptions
+            try {
+                // Wrap file into custom image class
+                ImageWrapper imageWrapper = new ImageWrapper(file, client.getIPAddress(), client.toString());
+                // Send the image
+                sendImage(imageWrapper);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error while opening image: "+e, "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
     // Inner class to receive messages
