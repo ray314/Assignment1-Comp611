@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 import java.awt.BorderLayout;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 
 import java.awt.GridLayout;
 import java.awt.event.*;
@@ -16,6 +17,7 @@ import java.net.Socket;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -39,9 +41,11 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     protected JPanel eastPanel;
     protected JPanel northPanel;
     protected JLabel lblTitle;
+    protected DefaultListModel<Client> model;
     protected JList<Client> list;
     protected JButton btnConnect;
     protected JButton btnSend;
+    protected JButton btnPost;
     protected Client client;
     protected Socket socket;
 
@@ -89,11 +93,18 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         this.getContentPane().add(eastPanel, BorderLayout.EAST);
         eastPanel.setLayout(new GridLayout(0, 1, 0, 0));
         // List of connected clients
-        list = new JList();
+        model = new DefaultListModel<>();
+        list = new JList<>(model);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        eastPanel.add(list);
 
         btnConnect = new JButton("Connect");
         btnConnect.addActionListener(this);
         eastPanel.add(btnConnect);
+        btnPost = new JButton("Post");
+        btnPost.setEnabled(false);
+        btnPost.addActionListener(this);
+        eastPanel.add(btnPost);
 
         southPanel = new JPanel();
         this.getContentPane().add(southPanel, BorderLayout.SOUTH);
@@ -124,7 +135,9 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             connect();
 		} else if (source == btnSend) {
             sendMessage();
-		}
+		} else if (source == btnPost) {
+            list.clearSelection();
+        }
     }
     // Send message to specific client or post to everyone
     private void sendMessage() {
@@ -160,6 +173,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         dialog.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         dialog.setVisible(true);
         btnSend.setEnabled(true);
+        btnPost.setEnabled(true);
         btnConnect.setEnabled(false); // Disable connect after client connected
         try {
             // Create socket and client
@@ -169,9 +183,6 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             this.oos = new ObjectOutputStream(socket.getOutputStream());
             this.oos.writeObject(client); // Write client to stream
             this.oos.flush();
-            //this.oos.reset();
-            // Create a new thread then run update
-            //Thread thread = new UpdateClientList();
             Thread thread2 = new InnerReceive();
             //thread.start();
             thread2.start();
@@ -194,7 +205,11 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                     if (serverResponse instanceof PrivateMessage ||
                         serverResponse instanceof Post) {
                         displayMessage(serverResponse);
-                    } 
+                    } else if (serverResponse instanceof DefaultListModel) {
+                        // Update JList
+                        System.out.println(model.getSize());
+                        model = (DefaultListModel<Client>) serverResponse;
+                    }
                     
                 } while (!closing); // End loop when client closes
             } catch (IOException | ClassNotFoundException e) {
@@ -216,45 +231,6 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             textArea.setText(message);
         }
     }
-
-    /* Update client list periodically
-    private class UpdateClientList extends Thread {
-        @Override
-        public void run() {
-            try {
-                ois = new ObjectInputStream(socket.getInputStream());
-                do {
-                    oos.writeObject(list);
-                    oos.flush();
-                    //oos.reset();
-                    // Retrieve updated list from server
-                    //list = (JList<Client>) ois.readObject();
-                    // Close streams
-                    System.out.println("test");
-                    Thread.sleep(500); // Wait every half second
-                    // Write a JList into stream
-                    oos.writeObject(list);
-                    oos.flush();
-                    //oos.reset();
-                } while (!closing); // End loop when client closes
-                
-            } catch (IOException e) {
-                System.err.println("Error updating client list: " + e);
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                System.err.println("Interrupted: " + e);
-            } finally {
-                try {
-                    if (ois != null) {
-                        ois.close();
-                    }
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }
-    }*/
 
     @Override
     public void windowClosing(WindowEvent e) {

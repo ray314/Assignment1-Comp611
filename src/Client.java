@@ -1,17 +1,14 @@
 package src;
 
 import java.io.Serializable;
-import java.net.Socket;
 
 public class Client implements Serializable{
     private String userName;
     private String ipAddress;
-
+    private boolean addRemove;
     /**
      * Creates a client instance
      * @param userName - User name
-     * @param ipAddress - IP address
-     * @param socket - Socket
      */
     public Client (String userName) {
         this.userName = userName;
@@ -30,6 +27,17 @@ public class Client implements Serializable{
      */
     public void setIPAddress(String ipAddress) {
         this.ipAddress = ipAddress;
+    }
+    /**
+     * Set the boolean flag on whether to add or remove client from the list
+     * @param addRemove - The boolean flag
+     */ 
+    public void setAddRemoveClient(boolean addRemove) {
+        this.addRemove = addRemove;
+    }
+
+    public boolean getAddRemoveClient() {
+        return addRemove;
     }
     /**
      * Returns the username

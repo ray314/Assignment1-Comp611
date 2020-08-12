@@ -26,18 +26,16 @@ public class Server {
     private HashMap<String, Socket> socketMap;
     // List to store all rooms
     private List<Room> roomList;
+    // List to store all clients
+    private ArrayList<Client> list;
     private DefaultListModel<Client> model;
-    // Client listthis.ois = new ObjectInputStream(socket.getInputStream());
-    private JList<Client> list;
     private boolean stopRequested; // Stop the server
 
     private Server() {
         socketMap = new HashMap<>();
         roomList = new ArrayList<Room>();
         stopRequested = false;
-        model = new DefaultListModel<>();
-        list = new JList<>(model);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list = new ArrayList<>();
     }
 
     // start the server if not already started and repeatedly listen
@@ -73,14 +71,14 @@ public class Server {
        System.out.println("Server finishing");
     }
     // Send to all clients currently connected
-    private void sendToAll(Message message) throws IOException {
-        System.out.println("sendToAll called");
+    private void sendToAll(Object message) throws IOException {
+        System.out.println(model.getSize());
         Iterator<Room> it = roomList.iterator();
         while(it.hasNext()) {
             it.next().sendToClient(message);
         }
     }
-
+    // Room that has the socket, client and i/o streams
     private class Room implements Runnable{
 
         private Socket socket;
@@ -112,8 +110,6 @@ public class Server {
                         forwardMessage(serverResponse);
                     } else if (serverResponse instanceof Client) { // Retrieve client details
                         addClient(serverResponse);
-                    } else if (serverResponse instanceof JList) { // Send in the client list
-                        updateJList();
                     } else if (serverResponse instanceof Post) { // Send to all
                         sendToAll((Post) serverResponse);
                     }
@@ -125,6 +121,15 @@ public class Server {
                 // Remove client and socket
                 model.removeElement(client);
                 socketMap.remove(client.getIPAddress());
+                // Remove room from ArrayList
+                roomList.remove(this);
+                // Update JList by updating model
+                try {
+                    sendToAll(model);
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
             } catch (ClassNotFoundException e) {
                 System.err.println("Class not found: " + e);
             } catch (IOException e) {
@@ -132,21 +137,16 @@ public class Server {
             } 
         }
         // Send a message to this client
-        private void sendToClient(Message message) {
+        private void sendToClient(Object message) {
             try {
                 oos.writeObject(message);
+                oos.reset();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 System.err.println("An error occured when sending to client: " + e);
             }
         }
-
-        private void updateJList() throws IOException {
-            oos.writeObject(list); // Write list into stream
-            oos.flush();
-        }
         // Add client to socketMap and Jlist
-        private void addClient(Object serverResponse) {
+        private void addClient(Object serverResponse) throws IOException {
             // Typecast into Client object
             Client client = (Client) serverResponse;
             client.setIPAddress(socket.getInetAddress().getHostAddress());
@@ -155,6 +155,8 @@ public class Server {
             this.client = client;
             // Add client to JList
             model.addElement(client);
+            // Update JList by sending model
+            sendToAll(model);
         }
         // Forward the message to the destination client
         private void forwardMessage(Object serverResponse) throws IOException {
@@ -169,8 +171,6 @@ public class Server {
             oos = new ObjectOutputStream(destSocket.getOutputStream());
             // Write object to stream
             oos.writeObject(sendMsg);
-            //Close stream
-            oos.flush();
             oos.reset();
         }
     }
