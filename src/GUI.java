@@ -45,6 +45,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     protected JList<Client> listView;
     protected JButton btnConnect;
     protected JButton btnSend;
+    protected JButton btnSendImage;
     protected JButton btnPost;
     protected Client client;
     protected Socket socket;
@@ -84,6 +85,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         btnConnect = new JButton("Connect");
         btnConnect.addActionListener(this);
         eastPanel.add(btnConnect);
+
         btnPost = new JButton("Post");
         btnPost.setEnabled(false);
         btnPost.addActionListener(this);
@@ -101,6 +103,11 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         btnSend.addActionListener(this); // Add action listener
         btnSend.setEnabled(false); // Don't enable until client has connected
         southPanel.add(btnSend);
+
+        btnSendImage = new JButton("Send/Post Image");
+        btnSendImage.addActionListener(this);
+        btnSendImage.setEnabled(false);
+        eastPanel.add(btnSendImage);
 
         textArea = new JTextArea();
         JScrollPane scroll = new JScrollPane(textArea);
@@ -158,6 +165,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         dialog.setVisible(true);
         btnSend.setEnabled(true);
         btnPost.setEnabled(true);
+        btnSendImage.setEnabled(true);
         btnConnect.setEnabled(false); // Disable connect after client connected
         try {
             // Create socket and client
@@ -195,6 +203,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                 System.err.println("Error with connection. Please connect again");
                 btnSend.setEnabled(false);
                 btnPost.setEnabled(false);
+                btnSendImage.setEnabled(false);
                 btnConnect.setEnabled(true);
             } catch (IOException e) {
                 System.err.println("Error receiving messages: " + e);

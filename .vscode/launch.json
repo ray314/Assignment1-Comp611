@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - StartGUI",
+            "request": "launch",
+            "mainClass": "src.StartGUI",
+            "projectName": "Assignment1-Comp611_3dbf821a"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - Server",
             "request": "launch",
             "mainClass": "src.Server",

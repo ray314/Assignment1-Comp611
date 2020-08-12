@@ -67,7 +67,6 @@ public class Server {
     }
     // Send to all clients currently connected
     private void sendToAll(Object message) throws IOException {
-        System.out.println(list.size());
         Iterator<Room> it = roomList.iterator();
         while(it.hasNext()) {
             it.next().sendToClient(message);
