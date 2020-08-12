@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,7 +17,9 @@ import java.net.SocketException;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -246,6 +249,8 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                         displayMessage(serverResponse);
                     } else if (serverResponse instanceof List) {
                         updateJList(serverResponse);
+                    } else if (serverResponse instanceof ImageWrapper) {
+                        displayImage(serverResponse);
                     }
                     
                 } while (!closing); // End loop when client closes
@@ -260,6 +265,15 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             } catch (ClassNotFoundException e) {
                 System.err.println("Wrong object type: " + e);
             }
+        }
+
+        private void displayImage(Object serverResponse) throws IOException {
+            // Typecast into ImageWrapper
+            ImageWrapper imageWrapper = (ImageWrapper) serverResponse;
+            File file = imageWrapper.getImage();
+            BufferedImage image = ImageIO.read(file);
+            JLabel picLabel = new JLabel(new ImageIcon(image));
+            JOptionPane.showMessageDialog(null, picLabel, "You have received an image from "+ imageWrapper.getOrigUserName(), JOptionPane.PLAIN_MESSAGE);
         }
 
         private void updateJList(Object serverResponse) {
