@@ -1,7 +1,9 @@
 package src;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -32,6 +34,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.GroupLayout;
 
 /**
  * The GUI for the client
@@ -281,9 +284,8 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             // Typecast into ImageWrapper
             ImageWrapper imageWrapper = (ImageWrapper) serverResponse;
             File file = imageWrapper.getImage();
-            BufferedImage image = ImageIO.read(file);
-            JLabel picLabel = new JLabel(new ImageIcon(image));
-            JOptionPane.showMessageDialog(null, picLabel, "You have received an image from "+ imageWrapper.getOrigUserName(), JOptionPane.PLAIN_MESSAGE);
+            // Run the JFrame into another thread
+            EventQueue.invokeLater(new ImagePanel(file, imageWrapper.getOrigUserName()));
         }
 
         private void updateJList(Object serverResponse) {
