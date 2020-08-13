@@ -17,13 +17,9 @@ public class ImagePanel extends JPanel implements Runnable{
     private BufferedImage image;
     private String origUserName;
 
-    public ImagePanel(File file, String origUserName) {
-        try {
-            image = ImageIO.read(file);
-            this.origUserName = origUserName;
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error loading image"+e, "Error", JOptionPane.ERROR_MESSAGE);
-        }
+    public ImagePanel(BufferedImage image, String origUserName) {
+        this.image = image;
+        this.origUserName = origUserName;
     }
 
     @Override

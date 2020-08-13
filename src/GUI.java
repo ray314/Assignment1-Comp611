@@ -283,9 +283,10 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         private void displayImage(Object serverResponse) throws IOException {
             // Typecast into ImageWrapper
             ImageWrapper imageWrapper = (ImageWrapper) serverResponse;
-            File file = imageWrapper.getImage();
+            BufferedImage image = imageWrapper.getImage();
+            System.out.println(imageWrapper.getOrigUserName());
             // Run the JFrame into another thread
-            EventQueue.invokeLater(new ImagePanel(file, imageWrapper.getOrigUserName()));
+            EventQueue.invokeLater(new ImagePanel(image, imageWrapper.getOrigUserName()));
         }
 
         private void updateJList(Object serverResponse) {
