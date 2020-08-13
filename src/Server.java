@@ -74,7 +74,6 @@ public class Server {
         Iterator<Room> it = roomList.iterator();
         while(it.hasNext()) {
             it.next().sendToClient(message);
-            System.out.println("updatin list");
         }
     }
     // Room that has the socket, client and i/o streams
