@@ -2,6 +2,10 @@ package src;
 
 import java.io.Serializable;
 
+/**
+ * The client
+ * @author fbb3628
+ */
 public class Client implements Serializable{
     private String userName;
     private String ipAddress;

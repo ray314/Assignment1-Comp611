@@ -1,5 +1,9 @@
 package src;
 
+/**
+ * A Private message containing ip address and destination user name
+ * @author fbb3628
+ */
 public class PrivateMessage extends Message {
     private String ipAddress;
     private String destUserName;

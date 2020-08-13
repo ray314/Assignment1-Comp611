@@ -2,6 +2,10 @@ package src;
 
 import java.awt.EventQueue;
 
+/**
+ * 
+ * @author fbb3628
+ */
 public class StartGUI {
     /**
      * Launch the application.

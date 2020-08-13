@@ -11,6 +11,7 @@ import java.awt.GridLayout;
 
 /**
  * A custom dialog for inputting name
+ * @author fbb3628
  */
 public class SetNameDialog extends JDialog implements ActionListener {
 

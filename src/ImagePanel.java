@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 
 /**
  * A panel for display image received from the server
+ * @author fbb3628
  */
 public class ImagePanel extends JPanel implements Runnable{
     private BufferedImage image;

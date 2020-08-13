@@ -34,6 +34,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * The GUI for the client
+ * @author fbb3628
  */
 public class GUI extends JFrame implements ActionListener, WindowListener {
 

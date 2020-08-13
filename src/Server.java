@@ -12,6 +12,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * The server for handling clients
+ * @author fbb3628
+ */
 public class Server {
     // Create a new instance of Server
     public final static Server server = new Server();

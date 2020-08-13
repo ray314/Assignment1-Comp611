@@ -3,6 +3,7 @@ package src;
 import java.io.Serializable;
 /**
  * An abstract class for encapsulating messages
+ * @author fbb3628
  */
 public abstract class Message implements Serializable {
     /**

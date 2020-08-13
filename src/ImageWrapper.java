@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 
 /**
  * ImageWrapper for representing an image and whether to post or send it as PM
+ * @author fbb3628
  */
 public class ImageWrapper implements Serializable {
 
