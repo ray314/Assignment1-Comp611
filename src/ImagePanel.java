@@ -22,7 +22,7 @@ public class ImagePanel extends JPanel implements Runnable{
             image = ImageIO.read(file);
             this.origUserName = origUserName;
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error loading image", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error loading image"+e, "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
