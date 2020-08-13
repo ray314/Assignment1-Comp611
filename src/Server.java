@@ -148,12 +148,14 @@ public class Server {
                 // Obtain the output stream from map
                 ObjectOutputStream oos = map.get(imageWrapper.getIPAddress());
                 oos.writeObject(imageWrapper);
+                oos.reset();
             }
         }
         // Send a message to this client
         private void sendToClient(Object message) {
             try {
                 oos.writeObject(message);
+                oos.reset();
             } catch (IOException e) {
                 System.err.println("An error occured when sending to client: " + e);
             }
@@ -183,6 +185,7 @@ public class Server {
             destOOS.writeObject(sendMsg);
             // Also write message to origin stream
             oos.writeObject(sendMsg);
+            oos.reset();
         }
     }
 }
