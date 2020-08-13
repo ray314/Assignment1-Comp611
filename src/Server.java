@@ -154,7 +154,6 @@ public class Server {
         private void sendToClient(Object message) {
             try {
                 oos.writeObject(message);
-                oos.reset();
             } catch (IOException e) {
                 System.err.println("An error occured when sending to client: " + e);
             }
