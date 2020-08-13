@@ -1,14 +1,11 @@
 package src;
 
-import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import java.awt.image.*;
-import java.io.File;
-import java.io.IOException;
 import java.awt.Graphics;
 import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 /**
  * A panel for display image received from the server
