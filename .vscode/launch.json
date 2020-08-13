@@ -9,7 +9,7 @@
             "name": "CodeLens (Launch) - StartGUI",
             "request": "launch",
             "mainClass": "src.StartGUI",
-            "projectName": "Assignment1-Comp611_7a2e98e6"
+            "projectName": "Assignment1-Comp611_3dbf821a"
         },
         {
             "type": "java",

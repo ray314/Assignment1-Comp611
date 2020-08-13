@@ -26,6 +26,10 @@ public class Server {
     private List<Client> list;
     private boolean stopRequested; // Stop the server
 
+    public static void main(String[] args) {
+        server.startServer();
+    }
+
     private Server() {
         map = new HashMap<>();
         roomList = new ArrayList<Room>();
@@ -67,7 +71,6 @@ public class Server {
     }
     // Send to all clients currently connected
     private void sendToAll(Object message) throws IOException {
-        System.out.println(list.size());
         Iterator<Room> it = roomList.iterator();
         while(it.hasNext()) {
             it.next().sendToClient(message);
@@ -107,6 +110,9 @@ public class Server {
                         addClient(serverResponse);
                     } else if (serverResponse instanceof Post) { // Send to all
                         sendToAll((Post) serverResponse);
+                    } else if (serverResponse instanceof ImageWrapper) {
+                        // Send image or post depending on ImageWrapper boolean
+                        sendImage(serverResponse);
                     }
                 }
                 oos.close();
@@ -130,6 +136,19 @@ public class Server {
             } catch (IOException e) {
                 System.err.println("I/O error"+e);
             } 
+        }
+
+        private void sendImage(Object serverResponse) throws IOException {
+            // Typecast into ImageWrapper
+            ImageWrapper imageWrapper = (ImageWrapper) serverResponse;
+            if (imageWrapper.getPostBoolean()) {
+                // Post
+                sendToAll(imageWrapper);
+            } else { // Forward to another client
+                // Obtain the output stream from map
+                ObjectOutputStream oos = map.get(imageWrapper.getIPAddress());
+                oos.writeObject(imageWrapper);
+            }
         }
         // Send a message to this client
         private void sendToClient(Object message) {
@@ -166,8 +185,5 @@ public class Server {
             // Also write message to origin stream
             oos.writeObject(sendMsg);
         }
-    }
-    public static void main(String[] args) {
-        server.startServer();
     }
 }

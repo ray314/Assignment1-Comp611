@@ -1,28 +1,40 @@
 package src;
 
-import javax.swing.JFrame;
 import java.awt.BorderLayout;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-
+import java.awt.EventQueue;
 import java.awt.GridLayout;
-import java.awt.event.*;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.GroupLayout;
 
 /**
  * The GUI for the client
@@ -45,6 +57,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
     protected JList<Client> listView;
     protected JButton btnConnect;
     protected JButton btnSend;
+    protected JButton btnSendImage;
     protected JButton btnPost;
     protected Client client;
     protected Socket socket;
@@ -84,6 +97,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         btnConnect = new JButton("Connect");
         btnConnect.addActionListener(this);
         eastPanel.add(btnConnect);
+
         btnPost = new JButton("Post");
         btnPost.setEnabled(false);
         btnPost.addActionListener(this);
@@ -101,6 +115,11 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         btnSend.addActionListener(this); // Add action listener
         btnSend.setEnabled(false); // Don't enable until client has connected
         southPanel.add(btnSend);
+
+        btnSendImage = new JButton("Send/Post Image");
+        btnSendImage.addActionListener(this);
+        btnSendImage.setEnabled(false);
+        eastPanel.add(btnSendImage);
 
         textArea = new JTextArea();
         JScrollPane scroll = new JScrollPane(textArea);
@@ -120,6 +139,8 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             sendMessage();
 		} else if (source == btnPost) {
             sendPost();
+        } else if (source == btnSendImage) {
+            openImage();
         }
     }
     // Send message to specific client or post to everyone
@@ -156,10 +177,12 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
         // Don't let the user close dialog until name is entered
         dialog.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         dialog.setVisible(true);
-        btnSend.setEnabled(true);
-        btnPost.setEnabled(true);
-        btnConnect.setEnabled(false); // Disable connect after client connected
         try {
+            // Enable the posting/sending buttons
+            btnSend.setEnabled(true);
+            btnPost.setEnabled(true);
+            btnSendImage.setEnabled(true);
+            btnConnect.setEnabled(false); // Disable connect after client connected
             // Create socket and client
             this.socket = new Socket(HOST_NAME, PORT);
             client = new Client(userName);
@@ -167,9 +190,60 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             Thread thread = new InnerReceive();
             thread.start();
             
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (ConnectException e) {
+            System.err.println("Error connecting to server. Please make sure the server is running: " + e);
+        } catch (IOException e) {
+            System.err.println("Error creating output stream: " +e);
+        }
+    }
+    // Send an image to server by byte array
+    private void sendImage(ImageWrapper imageWrapper) throws IOException {
+        // Show options
+        String[] options = {"Send to selected client", "Send to all clients"};
+        // Ask the user whether to send or post
+        String returnString = (String) JOptionPane.showInputDialog(this, "Do you want to send image to client or post to everyone?",
+            "Send or Post?", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        if (returnString.equals(options[0])) {
+            // Send to client
+            // Check if a client has been selected from the list
+            if (listView.getSelectedValue() != null) {
+                imageWrapper.setPostBoolean(false);
+                // Set the IP address destination
+                imageWrapper.setIPAddress(listView.getSelectedValue().getIPAddress());
+            } else {
+                // Else pop a dialog informing the user that a client has not been selected
+                JOptionPane.showMessageDialog(this, "Please select a client first", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+        } else {
+            // Post to all clients
+            imageWrapper.setPostBoolean(true);
+        }
+        // Write to stream
+        oos.writeObject(imageWrapper);
+    }
+    // Open image
+    private void openImage() {
+        JFileChooser fChooser = new JFileChooser();
+        fChooser.setDialogTitle("Select an image");
+        fChooser.setAcceptAllFileFilterUsed(false);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPEG/JPG and PNG files", "png", "jpeg", "jpg");
+        // Add file extension filter to file chooser
+        fChooser.addChoosableFileFilter(filter);
+        int returnVal = fChooser.showOpenDialog(this);
+        // When user selected a file
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fChooser.getSelectedFile();
+            // Handle exceptions
+            try {
+                // Wrap file into custom image class
+                ImageWrapper imageWrapper = new ImageWrapper(file, client.toString());
+                // Send the image
+                sendImage(imageWrapper);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error while opening image: "+e, "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
     // Inner class to receive messages
@@ -188,6 +262,8 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                         displayMessage(serverResponse);
                     } else if (serverResponse instanceof List) {
                         updateJList(serverResponse);
+                    } else if (serverResponse instanceof ImageWrapper) {
+                        displayImage(serverResponse);
                     }
                     
                 } while (!closing); // End loop when client closes
@@ -195,12 +271,21 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
                 System.err.println("Error with connection. Please connect again");
                 btnSend.setEnabled(false);
                 btnPost.setEnabled(false);
+                btnSendImage.setEnabled(false);
                 btnConnect.setEnabled(true);
             } catch (IOException e) {
                 System.err.println("Error receiving messages: " + e);
             } catch (ClassNotFoundException e) {
                 System.err.println("Wrong object type: " + e);
             }
+        }
+
+        private void displayImage(Object serverResponse) throws IOException {
+            // Typecast into ImageWrapper
+            ImageWrapper imageWrapper = (ImageWrapper) serverResponse;
+            File file = imageWrapper.getImage();
+            // Run the JFrame into another thread
+            EventQueue.invokeLater(new ImagePanel(file, imageWrapper.getOrigUserName()));
         }
 
         private void updateJList(Object serverResponse) {
