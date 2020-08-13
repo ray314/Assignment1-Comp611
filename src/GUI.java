@@ -293,9 +293,7 @@ public class GUI extends JFrame implements ActionListener, WindowListener {
             Iterator<Client> it = list.iterator();
             while(it.hasNext()) { // Iterate through the list and replace model elements
                 model.addElement(it.next());
-                
             }
-            System.out.println(list.size());
         }
 
         private void displayMessage(Object serverResponse) {
