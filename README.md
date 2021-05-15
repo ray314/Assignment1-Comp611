@@ -2,4 +2,4 @@
 This assignment was making a client that can send messages to other clients by using ServerSocket. This assignment was to gain understanding of threading in Java.<br>
 
 ![image](https://user-images.githubusercontent.com/12677108/118342879-90351400-b579-11eb-80bb-feb096889f50.png)
-Image above is GUI chatbox that sends messages between clients
+<br>Image above is GUI chatbox that sends messages between clients
