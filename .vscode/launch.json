@@ -6,6 +6,34 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch StartGUI",
+            "request": "launch",
+            "mainClass": "src.StartGUI",
+            "projectName": "Assignment1-Comp611_bfe80b63"
+        },
+        {
+            "type": "java",
+            "name": "Launch StartGUI",
+            "request": "launch",
+            "mainClass": "StartGUI",
+            "projectName": "Assignment1-Comp611_bfe80b63"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - StartGUI",
+            "request": "launch",
+            "mainClass": "src.StartGUI",
+            "projectName": "Assignment1-Comp611_a97da17"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Server",
+            "request": "launch",
+            "mainClass": "src.Server",
+            "projectName": "Assignment1-Comp611_a97da17"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - StartGUI",
             "request": "launch",
             "mainClass": "src.StartGUI",

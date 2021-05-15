@@ -38,7 +38,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class GUI extends JFrame implements ActionListener, WindowListener {
 
-    private final String HOST_NAME = "192.168.1.78";
+    private final String HOST_NAME = "172.28.44.120";
     private final int PORT = 7777;
     private boolean closing; // Check if GUI closed
     private ObjectOutputStream oos;
